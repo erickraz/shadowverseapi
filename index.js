@@ -9,7 +9,7 @@ app.use(express.static(__dirname + '/public'));
 
 var uristring = 
   process.env.MONGODB_URI || 
-  'mongodb://localhost/HelloMongoose';
+  'mongodb://localhost/test';
 
 // views is directory for all template files
 app.set('views', __dirname + '/views');
