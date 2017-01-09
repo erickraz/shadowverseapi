@@ -1,0 +1,80 @@
+ <!DOCTYPE html>  
+ <html>  
+ <head>  
+  <meta charset="utf-8">  
+  <title>實作EJS</title>  
+ </head>  
+ <body>  
+
+<style>
+  body {
+      color:white;
+      background-color:black;
+  }
+  .box {
+    width: 500px;
+    margin: 0px auto;
+    border: lightblue 3px;
+    border-style:double;
+    -webkit-box-sizing: border-box;
+       -moz-box-sizing: border-box;
+            box-sizing: border-box;
+  }
+  .clearfix:after {
+    content: ".";
+    display: block;
+    height: 0;
+    clear: both;
+    visibility: hidden;
+  }
+  .limg{
+    max-width:100%;
+
+  }
+  .rimg{
+    max-width:100%;
+
+  }
+  .lcontainer{
+    width:50%;
+    float: left;
+  }
+  .rcontainer{
+    width:50%;
+    float: left;
+  }
+  .namecontainer{
+    width:100%;
+  }
+  .el-label{
+    color: lightblue;
+  }
+
+</style>
+
+<div class="box clearfix">
+  <div class="namecontainer"> <%= name %>
+  </div>
+
+  <div class="lcontainer">
+  <div> <img src="/images/C_<%= _id %>.png" class="limg"> </div>
+  <div> <p class="limg"><%= unevolved %></p> </div>
+  </div>
+  <div class="rcontainer">
+  <div> <img src="/images/E_<%= _id %>.png" class="limg"> </div>
+  <div> <p class="limg"><%= evolved %></p> </div>
+  </div>
+</div>
+
+<div class="box clearfix">
+<ul type=square>
+<li><%= _id %></li>  
+<li><span class="el-label">特徵:</span> <span><%= trait %></span></li> 
+<li><span class="el-label">稀有:</span> <span><%= rarity %></span></li>  
+<li><span class="el-label">職業:</span> <span><%= class_ %></span></li>  
+<li><span class="el-label">卡包:</span> <span><%= pack %></span></li>  
+</ul>  
+</div>
+
+ </body>  
+ </html>  
