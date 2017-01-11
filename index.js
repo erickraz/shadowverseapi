@@ -77,8 +77,8 @@ app.get('/card/:id', function (req, res) {
                 {
                     _id: req.params.id,
                     name: card.name_ch,
-                    unevolved: card.unevolved.skill_ch,
-                    evolved: card.evolved.skill_ch,
+                    unevolved: card.unevolved.html_ch,
+                    evolved: card.evolved,
                     rarity: raritymap[card.detail.rarity],
                     pack: card.detail.pack,
                     trait: traitmap[card.detail.trait],
@@ -131,6 +131,32 @@ app.get('/init', function (req, res) {
     res.send("initialized");
 })
 
+app.get('/update', function (req, res) {
+    db.collection("cards_ch").find({}, function(err, doc){
+        doc.forEach(function(element){
+            if (element.evolved)
+                db.collection("cards_ch").update({'_id':element._id}, 
+                    {'$set':
+                        {'evolved.html': element.evolved.skill,
+                        'evolved.html_ch': element.evolved.skill_ch,
+                        'unevolved.html': element.unevolved.skill,
+                        'unevolved.html_ch': element.unevolved.skill_ch}
+                    }
+                );
+            else
+                db.collection("cards_ch").update({'_id':element._id}, 
+                    {'$set':
+                        {
+                        'unevolved.html': element.unevolved.skill,
+                        'unevolved.html_ch': element.unevolved.skill_ch}
+                    }
+                );
+        });
+    });
+
+
+    res.send("initialized");
+})
 
 
 app.get('/name=:id', function (req, res) {
