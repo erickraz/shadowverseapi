@@ -524,10 +524,13 @@ app.get('/rolls', function (req, res) {
     for(var i = 0; i < 4; ++i){
         if(perm[i] == 7)
             got = 1;
-        if(perm[i] == 6)
-            got2 = 1;
+        // if(perm[i] == 6)
+        //     got2 = 1;
         var l = rollmap[perm[i]].length;
         var r = getRandomInt(0,l);
+        if(perm[i] == 3 && r == 0)
+            got2 =1;
+
         str += rollmap[perm[i]][r] + " | ";
     }
 
@@ -539,6 +542,10 @@ app.get('/rolls', function (req, res) {
         //    //str += "      二獎冥守奶一波 ヽ(́◕◞౪◟◕‵)ﾉ";
         //}
         //else
+        if (got2 ==1){
+           str += "      安慰獎444巫妖 (ㄏ￣▽￣)ㄏ ㄟ(￣▽￣ㄟ)";
+        }
+        else
             str += "      什麼都沒中 只有轉蛋姬陪你 (;´༎ຶД༎ຶ`)";
     }
     res.send(str);
