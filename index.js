@@ -121,7 +121,7 @@ app.get('/init', function (req, res) {
         obj.forEach(function(element){
             db.collection(CARDS_COLLECTION).insertOne(element, function(err, doc){
                 if(err){
-                    handleError(res, err.message, "Failed to create new card");
+                    //handleError(res, err.message, "Failed to create new card");
                 }
             });
         });
