@@ -15,7 +15,7 @@
       background-color:black;
   }
   .box {
-    width: 500px;
+    width: 600px;
     margin: 0px auto;
     border-radius: 4px;
     background-color:rgba(27, 31, 34, 0.85);
@@ -127,10 +127,6 @@
     
   </div>  
   
-  <div>
-    This is a popbox test. <a class="popper" data-popbox="pop1">Hover here</a> to see how it works.
-    
-  </div>
 </div>
 
 <div id ="pop1" class="arrow_box">
@@ -151,6 +147,19 @@ $('a.popper').hover(function (e) {
     if (!($("a.popper").hasClass("show"))) {
         $(target).hide();
     }
+});
+
+$(document).ready(function() {
+  var movementStrength = 10;
+  var height = movementStrength / $(window).height();
+  var width = movementStrength / $(window).width();
+  $("body").mousemove(function(e){
+    var pageX = e.pageX - ($(window).width() / 2);
+    var pageY = e.pageY - ($(window).height() / 2);
+    pageX*=width;
+    pageY*=height;
+    $('body').css("background-position", "calc(50% - "+ pageX +"px) calc(15% - "+pageY+"px), center");
+  });
 });
 
 // $('a.popper').click(function (e) {
