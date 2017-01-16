@@ -673,7 +673,7 @@ function getRandomInt(min, max) {
 app.get('/revlo', function (req, res) {
     var sender = req.query.s, num = req.query.n, receiver = req.query.r;
     var msg = req.query.m, err_msg = req.query.e; 
-    if (receiver == null)
+    if (receiver == "null")
         receiver = sender;
     revlo.get.points(sender).then(data => {
         var mypoint = data.loyalty.current_points;
