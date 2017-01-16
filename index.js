@@ -674,7 +674,7 @@ function revlocommands(req, res, num, msg, err_msg){
     if (receiver == "null")
         receiver = sender;
     revlo.get.points(receiver).then(data=> {
-    }, function(err){ res.send("沒有 " + receiver + "這個人啦 ಠ_ಠ")} );
+    }, function(err){ res.send("沒有 " + receiver + " 這個人啦 ಠ_ಠ")} );
     revlo.get.points(sender).then(data => {
         var mypoint = data.loyalty.current_points;
         if(mypoint < num)
@@ -686,7 +686,7 @@ function revlocommands(req, res, num, msg, err_msg){
                 revlo.post.bonus(receiver, {
                     amount: num,
                 }).then(data => {
-                    res.send(sender + "買給 " + receiver + msg);
+                    res.send(sender +" 花"+ num +"送給 " + receiver + msg);
                 }, console.error);
             }, console.error);
         }
@@ -695,6 +695,15 @@ function revlocommands(req, res, num, msg, err_msg){
 
 app.get('/revlo', function (req, res) {
     if(req.query.c == "combo"){
-        revlocommands(req,res, 87," 一份87套餐 GivePLZ DoritosChip AMPTropPunch  ( ・・)つ―{}@{}@{}-―{}@{}@{}- ", " 沒錢不要買套餐啦贛 （╯－＿－）╯╧╧");
+        revlocommands(req,res, 87," 一份87套餐 GivePLZ DoritosChip AMPTropPunch  ( ・・)つ―{}@{}@{}- ", " 沒錢不要買套餐啦 ◔\"L__◔");
+    }
+    else if(req.query.c == "chicken"){
+        revlocommands(req,res, 50," 其實你想要的，是雞肉對吧？ ( ・・)つ―{}@{}@{}- ", " 沒錢不要買雞肉串啦 （╯－＿－）╯╧╧");
+    }
+    else if(req.query.c == "doritos"){
+        revlocommands(req,res, 10," 一包薯片 GivePLZ DoritosChip ", " 沒錢不要買DoritosChip啦 （(｀_ゝ´)");
+    }
+    else if(req.query.c == "beer"){
+        revlocommands(req,res, 30," 一罐啤酒 GivePLZ AMPTropPunch ", " 沒錢不要當開司啦 （ತಎತ");
     }
 })
