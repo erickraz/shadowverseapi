@@ -670,7 +670,7 @@ function getRandomInt(min, max) {
 
  
 function revlocommands(req, res, num, msg, err_msg){
-    var sender = req.query.s, receiver = req.query.r;
+    var sender = req.query.s, receiver = req.query.r.toLowerCase();
     if (receiver == "null")
         receiver = sender;
     revlo.get.points(receiver).then(data=> {
@@ -707,3 +707,11 @@ app.get('/revlo', function (req, res) {
         revlocommands(req,res, 30," 一罐啤酒 GivePLZ AMPTropPunch ", " 沒錢去當礦工啦 (╬ಠ益ಠ)");
     }
 })
+app.get('/revlotest', function (req, res) {
+    revlo.get.points("chaos1986").then(data => {
+        console.log(data);
+    }, console.error);
+
+})
+
+
