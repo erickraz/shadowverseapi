@@ -669,8 +669,8 @@ function getRandomInt(min, max) {
 }
 
  
-function revlocommands(req, res, msg, err_msg){
-    var sender = req.query.s, num = req.query.n, receiver = req.query.r;
+function revlocommands(req, res, num, msg, err_msg){
+    var sender = req.query.s, receiver = req.query.r;
     if (receiver == "null")
         receiver = sender;
     revlo.get.points(sender).then(data => {
@@ -679,10 +679,10 @@ function revlocommands(req, res, msg, err_msg){
             res.send(sender + err_msg);
         else{
             revlo.post.bonus(sender, {
-                amount: -1*Number(num),
+                amount: -1*num,
             }).then(data => {
                 revlo.post.bonus(receiver, {
-                    amount: Number(num),
+                    amount: num,
                 }).then(data => {
                     res.send(sender + "買給" + receiver + msg);
                 }, console.error);
@@ -693,6 +693,6 @@ function revlocommands(req, res, msg, err_msg){
 
 app.get('/revlo', function (req, res) {
     if(req.query.c == "combo"){
-        revlocommands(req,res,"一份87套餐 GivePLZ DoritosChip AMPTropPunch  ( ・・)つ―{}@{}@{}-―{}@{}@{}-", "沒錢不要買套餐啦贛");
+        revlocommands(req,res, 87,"一份87套餐 GivePLZ DoritosChip AMPTropPunch  ( ・・)つ―{}@{}@{}-―{}@{}@{}-", "沒錢不要買套餐啦贛");
     }
 })
