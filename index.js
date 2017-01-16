@@ -777,7 +777,8 @@ app.get('/gamble', function (req, res) {
                 str += "挖到"+num*10+"個麵包。天選之人4你 ╮(′～‵〞)╭";
                 bonus = num*9;
             }
-
+            var total = mypoint + bonus;
+            str += " 現在有"+ total +"個麵包";
             //send
             revlo.post.bonus(user, {
                 amount: bonus,
