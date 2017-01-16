@@ -804,6 +804,7 @@ app.get('/assemble', function(req, res){
         var n = parseInt(hash.substring(60),16);
         return n%M;
     }
+    // get the assemble percentage
     var h1 = getHashInt(sender,100), h2 = getHashInt(receiver,100);
     var a = h1-h2;
     if(a < 0) a *= -1;
@@ -814,7 +815,19 @@ app.get('/assemble', function(req, res){
     else if(a == 87)
         a = 77;
 
-    res.send(""+a);
+
+    //post process
+    var str = "";
+    str += sender + " 跟 " + receiver + " 有" + a + "%像 ";
+    if(a > 87)
+        str += "KappaPride KappaPride KappaPride";
+    else if (a > 50)
+        str += " GivePLZ TakeNRG";
+    else if (a > 25)
+        str += " 恩...不太像 FailFish";
+    else 
+        str += " 完全不像 BibleThump";
+    res.send(str);
 })
 
 
