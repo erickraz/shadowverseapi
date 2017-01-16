@@ -564,7 +564,8 @@ app.get('/rolls', function (req, res) {
             //roll
             var str = "", got = 0, got2 = 0;
             str += user + " 花10個麵包轉出了:     | ";
-            var perm = getRandomPerm(1,8,4);
+            //var perm = getRandomPerm(1,8,4);
+            var perm = shuffle([1,2,3,4,5,6,7]);
             var bonus = 0;
             
             var rollmap = {
@@ -618,6 +619,21 @@ app.get('/rolls', function (req, res) {
 
 })
 
+function shuffle(array) {
+    var i = array.length,
+        j = 0,
+        temp;
+    while (i--) {
+        j = Math.floor(Math.random() * (i+1));
+        // swap randomly chosen element with current element
+        temp = array[i];
+        array[i] = array[j];
+        array[j] = temp;
+    }
+    return array;
+}
+
+
 function getRandomPerm(min, max, n) {
     var array = [];
     for(var i = 0; i < n; ++i){
@@ -629,7 +645,6 @@ function getRandomPerm(min, max, n) {
             array.push(r);
         }
     }
-
     return array;
 }
 
