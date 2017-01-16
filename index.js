@@ -698,7 +698,7 @@ app.get('/revlo', function (req, res) {
     }
 })
 app.get('/revlo_transfer', function (req, res) {
-    var sender = req.query.s, arg = req.query.r.toLowerCase();
+    var sender = req.query.s, arg = req.query.arg.toLowerCase();
     var example = " 範例: !轉帳 shanasaikou 87";
     //split and check input
     if (arg == "null"){
@@ -791,7 +791,23 @@ app.get('/gamble', function (req, res) {
 })
 
 app.get('/assemble', function(req, res){
-    var sender = req.query.sender, receiver = req.query.receiver;
+    var sender = req.query.sender, arg = req.query.arg, receiver;
+    //split and check input
+    if (arg == "null"){
+        receiver = sender;
+    }
+    else{
+        var argv = arg.split(" ");
+        if (argv.length == 1){
+            receiver = argv[0];
+        }
+        else if (argv.length == 2){
+            sender = argv[0];
+            receiver = argv[1];
+        }
+    }
+
+    //crypto func
     var crypto;
     try {
       crypto = require('crypto');
