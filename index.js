@@ -554,52 +554,6 @@ function res_ch(err, doc, req, res, nfound){
     }
 }
 
-app.get('/roll', function (req, res) {
-    var str = "", got = 0;
-    str += "轉出了:     | ";
-    var perm = getRandomPerm(1,9,4), counter = 0;
-    
-    
-
-    for(var i = 0; i < 4; ++i){
-        db.collection(CARDS_COLLECTION).aggregate(
-            [  
-            { 
-                $match: {
-                    'detail.type': "follower", 
-                    'detail.class': 'Shadowcraft',
-                    'detail.cost': perm[i],
-                    '_id': {$ne:"103541010"}
-                } 
-            },
-            { $sample: { size: 1 } } ]
-        ).toArray(function(err, doc){
-            str += doc[0].name_ch + "(" + doc[0].detail.cost + ")" + " | ";
-            if(doc[0]._id == "101531050"){
-                got = 1;
-            }
-            complete();
-        });
-    }
-
-    var complete = function(){
-        if (counter != 3){
-            ++counter;
-            return;
-        }
-        if(got == 1){
-            str += "      恭喜中大獎 ゜ω゜)っ";
-        }
-        else if(got == 0){
-            str += "      什麼都沒中 只有轉蛋姬陪你 (;´༎ຶД༎ຶ`)";
-        }
-        res.send(str);
-    }
-    
-
-})
-
-
 app.get('/rolls', function (req, res) {
     var str = "", got = 0, got2 = 0;
     str += "轉出了:     | ";
@@ -674,23 +628,24 @@ function revlocommands(req, res, num, msg, err_msg){
     if (receiver == "null")
         receiver = sender;
     revlo.get.points(receiver).then(data=> {
-    }, function(err){ res.send("沒有 " + receiver + " 這個人啦 ಠ_ಠ")} );
-    revlo.get.points(sender).then(data => {
-        var mypoint = data.loyalty.current_points;
-        if(mypoint < num)
-            res.send(sender + err_msg);
-        else{
-            revlo.post.bonus(sender, {
-                amount: num,
-            }).then(data => {
-                revlo.post.bonus(receiver, {
+        revlo.get.points(sender).then(data => {
+            var mypoint = data.loyalty.current_points;
+            if(mypoint < num)
+                res.send(sender + err_msg);
+            else{
+                revlo.post.bonus(sender, {
                     amount: num,
                 }).then(data => {
-                    res.send(sender +" 花"+ num +"送給 " + receiver + msg);
+                    revlo.post.bonus(receiver, {
+                        amount: num,
+                    }).then(data => {
+                        res.send(sender +" 花"+ num +"送給 " + receiver + msg);
+                    }, console.error);
                 }, console.error);
-            }, console.error);
-        }
-    }, console.error);
+            }
+        }, console.error);
+    }, function(err){ res.send("你找錯了 這裡沒有 " + receiver + " 這個人啦 ಠ_ಠ")} );
+
 }
 
 app.get('/revlo', function (req, res) {
@@ -701,16 +656,59 @@ app.get('/revlo', function (req, res) {
         revlocommands(req,res, 50," 其實你想要的，是雞肉對吧？ ( ・・)つ―{}@{}@{}- ", " 沒錢不要買雞肉串啦 （╯－＿－）╯╧╧");
     }
     else if(req.query.c == "doritos"){
-        revlocommands(req,res, 10," 一包薯片 GivePLZ DoritosChip ", " 沒錢不要買DoritosChip啦 （｀_ゝ´)");
+        revlocommands(req,res, 10," 一包薯片 GivePLZ DoritosChip ", " 沒錢不要買 DoritosChip 啦 （｀_ゝ´)");
     }
     else if(req.query.c == "beer"){
         revlocommands(req,res, 30," 一罐啤酒 GivePLZ AMPTropPunch ", " 沒錢去當礦工啦 (╬ಠ益ಠ)");
     }
+    else if(req.query.c == "cure"){
+        revlocommands(req,res, 168," 醫療包 GivePLZ ✚ 別放棄治療 ", " 沒錢先治療自己好爆 FailFish");
+    }
 })
-app.get('/revlotest', function (req, res) {
-    revlo.get.points("chaos1986").then(data => {
-        console.log(data);
-    }, console.error);
+app.get('/revlo_transfer', function (req, res) {
+    var sender = req.query.s, arg = req.query.r.toLowerCase();
+    var example = " 範例: !轉帳 shanasaikou 87";
+    //split and check input
+    if (arg == "null")
+        res.send("沒輸東西是要轉什麼啦 (╬ಠ益ಠ)" + example); 
+    var argv = arg.split(" ");
+    var receiver, num;
+    if (argv.length == 1){
+        receiver = sender;
+        num = Number(argv[0]);
+    }
+    else if (argv.length == 2){
+        receiver = argv[0];
+        num = Number(argv[1]);
+    }
+    else{
+        res.send("大大你指令輸錯了 FailFish" + example); 
+        return;
+    }
+    if(isNaN(num)){
+        res.send("大大你輸錯了 FailFish" + example);
+        return;
+    }
+    //send
+    revlo.get.points(receiver).then(data=> {
+        revlo.get.points(sender).then(data => {
+            var mypoint = data.loyalty.current_points;
+            if(mypoint < num)
+                res.send(sender + "沒錢先挖礦好爆 還想轉錢給別人 BrokeBack");
+            else{
+                revlo.post.bonus(sender, {
+                    amount: num,
+                }).then(data => {
+                    revlo.post.bonus(receiver, {
+                        amount: num,
+                    }).then(data => {
+                        res.send(sender +" 轉"+ num +"給 " + receiver + " VoHiYo");
+                    }, console.error);
+                }, console.error);
+            }
+        }, console.error);
+    }, function(err){ res.send("你找錯了 這裡沒有 " + receiver + " 這個人啦 ಠ_ಠ")} );
+
 
 })
 
