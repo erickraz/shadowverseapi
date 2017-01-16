@@ -673,18 +673,20 @@ function revlocommands(req, res, num, msg, err_msg){
     var sender = req.query.s, receiver = req.query.r;
     if (receiver == "null")
         receiver = sender;
+    revlo.get.points(receiver).then(data=> {
+    }, function(err){ res.send("沒有 " + receiver + "這個人啦 ಠ_ಠ")} );
     revlo.get.points(sender).then(data => {
         var mypoint = data.loyalty.current_points;
         if(mypoint < num)
             res.send(sender + err_msg);
         else{
             revlo.post.bonus(sender, {
-                amount: -1*num,
+                amount: num,
             }).then(data => {
                 revlo.post.bonus(receiver, {
                     amount: num,
                 }).then(data => {
-                    res.send(sender + "買給" + receiver + msg);
+                    res.send(sender + "買給 " + receiver + msg);
                 }, console.error);
             }, console.error);
         }
@@ -693,6 +695,6 @@ function revlocommands(req, res, num, msg, err_msg){
 
 app.get('/revlo', function (req, res) {
     if(req.query.c == "combo"){
-        revlocommands(req,res, 87,"一份87套餐 GivePLZ DoritosChip AMPTropPunch  ( ・・)つ―{}@{}@{}-―{}@{}@{}-", "沒錢不要買套餐啦贛");
+        revlocommands(req,res, 87," 一份87套餐 GivePLZ DoritosChip AMPTropPunch  ( ・・)つ―{}@{}@{}-―{}@{}@{}- ", " 沒錢不要買套餐啦贛 （╯－＿－）╯╧╧");
     }
 })
