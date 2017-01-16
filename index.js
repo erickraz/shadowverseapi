@@ -701,9 +701,9 @@ app.get('/revlo', function (req, res) {
         revlocommands(req,res, 50," 其實你想要的，是雞肉對吧？ ( ・・)つ―{}@{}@{}- ", " 沒錢不要買雞肉串啦 （╯－＿－）╯╧╧");
     }
     else if(req.query.c == "doritos"){
-        revlocommands(req,res, 10," 一包薯片 GivePLZ DoritosChip ", " 沒錢不要買DoritosChip啦 （(｀_ゝ´)");
+        revlocommands(req,res, 10," 一包薯片 GivePLZ DoritosChip ", " 沒錢不要買DoritosChip啦 （｀_ゝ´)");
     }
     else if(req.query.c == "beer"){
-        revlocommands(req,res, 30," 一罐啤酒 GivePLZ AMPTropPunch ", " 沒錢不要當開司啦 （ತಎತ");
+        revlocommands(req,res, 30," 一罐啤酒 GivePLZ AMPTropPunch ", " 沒錢去當礦工啦 (╬ಠ益ಠ)");
     }
 })
