@@ -555,49 +555,66 @@ function res_ch(err, doc, req, res, nfound){
 }
 
 app.get('/rolls', function (req, res) {
-    var str = "", got = 0, got2 = 0;
-    str += "轉出了:     | ";
-    var perm = getRandomPerm(1,8,4);
-    
-    var rollmap = {
-        1: ["骷髏獸(112)"],
-        2: ["踉蹌的不死者(212)","獨角舞者・優尼子(222)",],
-        3: ["暗之從者(311)", "霸食帝・凱薩霸(322)", "地底士兵(314)"],
-        4: ["烏爾德(433)", "死靈刺客(433)"],
-        5: ["可魯(533)"],
-        6: ["冥守的戰士・卡姆拉(745)"],
-        7: ["決鬥者・莫迪凱(855)"]
-    }
+    var user = req.query.u;
+    revlo.get.points(user).then(data => {
+        var mypoint = data.loyalty.current_points;
+        if(mypoint < 10)
+            res.send(user + " 沒錢先挖礦 再來玩轉蛋姬 ლↂ‿‿ↂლ");
+        else{
+            //roll
+            var str = "", got = 0, got2 = 0;
+            str += user + " 花10個麵包轉出了:     | ";
+            var perm = getRandomPerm(1,8,4);
+            var bonus = 0;
+            
+            var rollmap = {
+                1: ["骷髏獸(112)"],
+                2: ["踉蹌的不死者(212)","獨角舞者・優尼子(222)",],
+                3: ["暗之從者(311)", "霸食帝・凱薩霸(322)", "地底士兵(314)"],
+                4: ["烏爾德(433)", "死靈刺客(433)"],
+                5: ["可魯(533)"],
+                6: ["冥守的戰士・卡姆拉(745)"],
+                7: ["決鬥者・莫迪凱(855)"]
+            }
+            for(var i = 0; i < 4; ++i){
+                if(perm[i] == 7)
+                    got = 1;
+                // if(perm[i] == 6)
+                //     got2 = 1;
+                var l = rollmap[perm[i]].length;
+                var r = getRandomInt(0,l);
+                if(perm[i] == 3 && r == 0)
+                    got2 =1;
 
-    for(var i = 0; i < 4; ++i){
-        if(perm[i] == 7)
-            got = 1;
-        // if(perm[i] == 6)
-        //     got2 = 1;
-        var l = rollmap[perm[i]].length;
-        var r = getRandomInt(0,l);
-        if(perm[i] == 3 && r == 0)
-            got2 =1;
+                str += rollmap[perm[i]][r] + " | ";
+            }
 
-        str += rollmap[perm[i]][r] + " | ";
-    }
-
-    if(got == 1){
-        str += "      恭喜中大獎 855一隻 ゜ω゜)っ";
-    }
-    else if(got == 0){
-        //if (got2 ==1){
-        //    //str += "      二獎冥守奶一波 ヽ(́◕◞౪◟◕‵)ﾉ";
-        //}
-        //else
-        if (got2 ==1){
-           str += "      安慰獎444巫妖 (ㄏ￣▽￣)ㄏ ㄟ(￣▽￣ㄟ)";
+            if(got == 1){
+                str += "      恭喜中大獎 855一隻 ゜ω゜)っ 獲得14個麵包";
+                bonus = 14-10;
+            }
+            else if(got == 0){
+                //if (got2 ==1){
+                //    //str += "      二獎冥守奶一波 ヽ(́◕◞౪◟◕‵)ﾉ";
+                //}
+                //else
+                if (got2 ==1){
+                   str += "      安慰獎444巫妖 (ㄏ￣▽￣)ㄏ ㄟ(￣▽￣ㄟ) 獲得7個麵包";
+                   bonus = 7-10;
+                }
+                else{
+                    str += "      什麼都沒中 只有轉蛋姬陪你 (;´༎ຶД༎ຶ`)";
+                    bonus = 0-10;
+                }
+            }
+            //send
+            revlo.post.bonus(user, {
+                amount: bonus,
+            }).then(data => {
+                res.send(str);
+            }, console.error);
         }
-        else
-            str += "      什麼都沒中 只有轉蛋姬陪你 (;´༎ຶД༎ຶ`)";
-    }
-    res.send(str);
-    
+    }, console.error);    
 
 })
 
@@ -634,7 +651,7 @@ function revlocommands(req, res, num, msg, err_msg){
                 res.send(sender + err_msg);
             else{
                 revlo.post.bonus(sender, {
-                    amount: num,
+                    amount: -1*num,
                 }).then(data => {
                     revlo.post.bonus(receiver, {
                         amount: num,
@@ -662,7 +679,7 @@ app.get('/revlo', function (req, res) {
         revlocommands(req,res, 30," 一罐啤酒 GivePLZ AMPTropPunch ", " 沒錢去當礦工啦 (╬ಠ益ಠ)");
     }
     else if(req.query.c == "cure"){
-        revlocommands(req,res, 168," 醫療包 GivePLZ ✚ 別放棄治療 ", " 沒錢先治療自己好爆 FailFish");
+        revlocommands(req,res, 168," 醫療包 GivePLZ ✚ 請別放棄治療 ", " 沒錢先治療自己好爆 FailFish");
     }
 })
 app.get('/revlo_transfer', function (req, res) {
@@ -697,7 +714,7 @@ app.get('/revlo_transfer', function (req, res) {
                 res.send(sender + "沒錢先挖礦好爆 還想轉錢給別人 BrokeBack");
             else{
                 revlo.post.bonus(sender, {
-                    amount: num,
+                    amount: -1*num,
                 }).then(data => {
                     revlo.post.bonus(receiver, {
                         amount: num,
