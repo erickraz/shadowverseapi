@@ -789,3 +789,33 @@ app.get('/gamble', function (req, res) {
     }, console.error);    
 
 })
+
+app.get('/assemble', function(req, res){
+    var sender = req.query.sender, receiver = req.query.receiver;
+    var crypto;
+    try {
+      crypto = require('crypto');
+    } catch (err) {
+      console.log('crypto support is disabled!');
+    }
+    function getHashInt(person, M){
+        const secret = '0';
+        const hash = crypto.createHmac('sha256', secret).update(person).digest('hex');
+        var n = parseInt(hash.substring(60),16);
+        return n%M;
+    }
+    var h1 = getHashInt(sender,100), h2 = getHashInt(receiver,100);
+    var a = h1-h2;
+    if(a < 0) a *= -1;
+    a = 100 - a;
+    //rigged
+    if(a == 77)
+        a = 87;
+    else if(a == 87)
+        a = 77;
+
+    res.send(""+a);
+})
+
+
+
