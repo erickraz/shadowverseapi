@@ -4,49 +4,201 @@
 
 <h3>A demonstration of how to access a SELECT element</h3>
 
-<FORM NAME="my_form" METHOD=POST TARGET>
-    <INPUT TYPE="checkbox"  NAME="check1">1.旅遊<P> 
-    <INPUT TYPE="checkbox"  NAME="check2">2.音樂<P>
-    <INPUT TYPE="checkbox"  NAME="check3">3.美術<P>
-    <INPUT TYPE="checkbox"  NAME="check4">4.閱讀<P>
-    <INPUT TYPE="checkbox"  NAME="check5">5.計算機與網路<P>
-    <INPUT TYPE="button" VALUE="確認"
-    onClick="choice(this.form)">
- </FORM>   
+<style>
+.box2 {
+  display: inline-block;
+  width: 200px;
+  height: 100px;
+  margin: 1em;
+}
+</style>
 
-<p>Click the button to get the number of option elements found in a drop-down list.</p>
+
+<form action="/test2" id="req_form">
+
+<div class="cards-search-content">
+<fieldset>
+<p class="cards-search-label el-label">卡片名稱</p>
+<input class="el-input-text" type="text" name="card_name" placeholder="輸入名稱" value="" />
+</fieldset>
+</div>
 
 <div class="cards-search-input">
-<span class="cards-search-label el-label">Type</span>
+<span class="cards-search-label el-label">職業</span>
+
+
 <label class="cards-search-checkbox">
-<input type="checkbox" name="char_type[]" value=1 />
+<input type="checkbox" name="class_" value=0 />
 <span class="el-label-checkbox">
-Followers
+妖精
+</span>
+</label>
+
+<label class="cards-search-checkbox">
+<input type="checkbox" name="class_" value=1 />
+<span class="el-label-checkbox">
+皇家
+</span>
+</label>
+
+<label class="cards-search-checkbox">
+<input type="checkbox" name="class_" value=2 />
+<span class="el-label-checkbox">
+女巫
+</span>
+</label>
+
+<label class="cards-search-checkbox">
+<input type="checkbox" name="class_" value=3 />
+<span class="el-label-checkbox">
+</span>
+龍族
+</label>
+
+<label class="cards-search-checkbox">
+<input type="checkbox" name="class_" value=4 />
+<span class="el-label-checkbox">
+</span>
+死靈
+</label>
+
+<label class="cards-search-checkbox">
+<input type="checkbox" name="class_" value=5 />
+<span class="el-label-checkbox">
+</span>
+吸血鬼
+</label>
+
+<label class="cards-search-checkbox">
+<input type="checkbox" name="class_" value=6 />
+<span class="el-label-checkbox">
+</span>
+主教
+</label>
+
+<label class="cards-search-checkbox">
+<input type="checkbox" name="class_" value=7 />
+<span class="el-label-checkbox">
+</span>
+中立
+</label>
+
+</div>
+
+<div class="cards-search-input">
+<span class="cards-search-label el-label">卡包</span>
+
+
+<label class="cards-search-checkbox">
+<input type="checkbox" name="pack" value=0 />
+<span class="el-label-checkbox">
+基礎包
 </span>
 </label>
 <label class="cards-search-checkbox">
-<input type="checkbox" name="char_type[]" value=2 />
+<input type="checkbox" name="pack" value=1 />
 <span class="el-label-checkbox">
-Spells
+標準卡包
 </span>
 </label>
 <label class="cards-search-checkbox">
-<input type="checkbox" name="char_type[]" value=3 />
+<input type="checkbox" name="pack" value=2 />
 <span class="el-label-checkbox">
-Amulets
+暗黑進化
+</span>
+</label>
+<label class="cards-search-checkbox">
+<input type="checkbox" name="pack" value=3 />
+<span class="el-label-checkbox">
+巴哈姆特降臨
 </span>
 </label>
 </div>
 
+<div class="cards-search-input">
+<span class="cards-search-label el-label">費用</span>
 
-<form action="/card">
-Name: <input type="text" name="name" value="Mickey"><br>
+<% for(var i=1; i<=10; i++) { %>
+  <label class="cards-search-checkbox">
+  <input type="checkbox" name="cost" value=<%= i-1 %> />
+  <span class="el-label-checkbox">
+  <%= i %>
+  </span>
+  </label>
+<% } %>
+
+</div>
+
+<div class="cards-search-input">
+<span class="cards-search-label el-label">種類</span>
+<label class="cards-search-checkbox">
+<input type="checkbox" name="char_type" value=0 />
+<span class="el-label-checkbox">
+隨從
+</span>
+</label>
+<label class="cards-search-checkbox">
+<input type="checkbox" name="char_type" value=1 />
+<span class="el-label-checkbox">
+法術
+</span>
+</label>
+<label class="cards-search-checkbox">
+<input type="checkbox" name="char_type" value=2 />
+<span class="el-label-checkbox">
+護符
+</span>
+</label>
+</div>
+
+<div class="cards-search-input">
+<span class="cards-search-label el-label">稀有度</span>
+<label class="cards-search-checkbox">
+<input type="checkbox" name="rarity" value=0 />
+<span class="el-label-checkbox">
+銅卡
+</span>
+</label>
+<label class="cards-search-checkbox">
+<input type="checkbox" name="rarity" value=1 />
+<span class="el-label-checkbox">
+銀卡
+</span>
+</label>
+<label class="cards-search-checkbox">
+<input type="checkbox" name="rarity" value=2 />
+<span class="el-label-checkbox">
+金卡
+</span>
+</label>
+<label class="cards-search-checkbox">
+<input type="checkbox" name="rarity" value=3 />
+<span class="el-label-checkbox">
+虹卡
+</span>
+</label>
+</div>
+
 <input type="submit" value="Submit">
+
 </form>
 
 
-<p id="demo"></p>
+<% if(cards.length == 0) {%>
+<div class="box2">
+  沒有符合的卡片
+</div>
+<% }else {%>
+  <% for(var i = 0; i < cards.length; ++i) {%>
+<div class="box2">
+  <%= cards[i].name_ch %>
+</div>
 
+  <% }%>
+<% } %>
+
+
+<script src="/js/jquery-3.1.1.min.js" type="text/javascript"></script>
 <script>
 function choice(my_form)
      {
@@ -66,6 +218,34 @@ function choice(my_form)
          str="沒有選擇任何一項" 
       alert(str)           
      }
+$(document).ready(function() {
+  var myForm = document.forms.req_form;
+  var namePanel = myForm.elements['card_name'];
+  namePanel.value = "<%= card_name %>";
+
+  var myControls = myForm.elements['class_'];
+  <% for(var ele in class_) { %>
+    myControls[<%= class_[ele] %>].checked=true;
+  <% } %>
+  myControls = myForm.elements['pack'];
+  <% for(var ele in pack) { %>
+    myControls[<%= pack[ele] %>].checked=true;
+  <% } %>
+  myControls = myForm.elements['cost'];
+  <% for(var ele in cost) { %>
+    myControls[<%= cost[ele] %>].checked=true;
+  <% } %>
+  myControls = myForm.elements['char_type'];
+  <% for(var ele in char_type) { %>
+    myControls[<%= char_type[ele] %>].checked=true;
+  <% } %>
+  myControls = myForm.elements['rarity'];
+  <% for(var ele in rarity) { %>
+    myControls[<%= rarity[ele] %>].checked=true;
+  <% } %>
+});
+
+
 </script>
 
 </body>

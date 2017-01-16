@@ -12,7 +12,8 @@
   "dependencies": {
     "ejs": "2.4.1",
     "express": "4.13.3",
-    "mongodb": "^2.0.43"
+    "mongodb": "^2.0.43",
+    "node-revlobot-api": "0.0.2"
   },
   "repository": {
     "type": "git",

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h3>A demonstration of how to access a SELECT element</h3>
+
+<FORM NAME="my_form" METHOD=POST TARGET>
+    <INPUT TYPE="checkbox"  NAME="check1">1.旅遊<P> 
+    <INPUT TYPE="checkbox"  NAME="check2">2.音樂<P>
+    <INPUT TYPE="checkbox"  NAME="check3">3.美術<P>
+    <INPUT TYPE="checkbox"  NAME="check4">4.閱讀<P>
+    <INPUT TYPE="checkbox"  NAME="check5">5.計算機與網路<P>
+    <INPUT TYPE="button" VALUE="確認"
+    onClick="choice(this.form)">
+ </FORM>   
+
+<p>Click the button to get the number of option elements found in a drop-down list.</p>
+
+
+<form action="/test" id="req_form">
+<div class="cards-search-input">
+<span class="cards-search-label el-label">Type</span>
+<label class="cards-search-checkbox">
+<input type="checkbox" name="char_type" value=0 />
+<span class="el-label-checkbox">
+Followers
+</span>
+</label>
+<label class="cards-search-checkbox">
+<input type="checkbox" name="char_type" value=1 />
+<span class="el-label-checkbox">
+Spells
+</span>
+</label>
+<label class="cards-search-checkbox">
+<input type="checkbox" name="char_type" value=2 />
+<span class="el-label-checkbox">
+Amulets
+</span>
+</label>
+</div>
+<input type="submit" value="Submit">
+
+</form>
+
+<form action="/card">
+Name: <input type="text" name="name" value="Mickey"><br>
+<input type="submit" value="Submit">
+</form>
+
+<div>
+<% for(var ele in char_type) { %>
+  <%= char_type[ele] %>
+  <% } %>
+</div>
+
+<p id="demo"></p>
+
+<script src="/js/jquery-3.1.1.min.js" type="text/javascript"></script>
+<script>
+function choice(my_form)
+     {
+      var str=""
+      
+      if(my_form.check1.checked)
+        str +="選擇了旅遊\n"
+      if(my_form.check2.checked)
+        str +="選擇了音樂\n"
+      if(my_form.check3.checked)
+        str +="選擇了美術\n"
+      if(my_form.check4.checked)
+        str +="選擇了閱讀\n" 
+      if(my_form.check5.checked)
+        str +="選擇了計算機與網路\n"
+      if(str=="")
+         str="沒有選擇任何一項" 
+      alert(str)           
+     }
+$(document).ready(function() {
+  var myForm = document.forms.req_form;
+  var myControls = myForm.elements['char_type'];
+  <% for(var ele in char_type) { %>
+    myControls[<%= char_type[ele] %>].checked=true;
+  <% } %>
+});
+
+
+</script>
+
+</body>
+</html>

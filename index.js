@@ -3,6 +3,9 @@ var app = express();
 var mongodb = require("mongodb");
 var ObjectID = mongodb.ObjectID;
 
+const revlo = require('node-revlobot-api')('9egaKeMFszamdYhlmxAhM3UPaT1QBmnNivJLzwhxcu8');
+
+
 app.set('port', (process.env.PORT || 5000));
 
 app.use(express.static(__dirname + '/public'));
@@ -39,6 +42,7 @@ var typemap = {
     'spell': "法術",
     'amulet': "護符"
 }
+
 // var typemapr = {
 //     '隨從': "follower",
 //     '法術': "spell",
@@ -56,6 +60,12 @@ var raritymap = {
     'Gold': "金卡",
     'Legendary': "虹卡"
 }
+var packmap ={
+    'BASIC': "基礎包",
+    'STD': "標準卡包",
+    'DARKNESS': "暗黑進化",
+    'ROB': "巴哈姆特降臨"
+}
 
 app.get('/', function(request, response) {
   response.render('pages/index');
@@ -63,11 +73,95 @@ app.get('/', function(request, response) {
 
 
  app.get('/test', function(req, res){
+    console.log(req.query);
     res.render('pages/test', {  
-   title: '首頁',  
-   users: ['Kai', 'aYen', 'Kyousuke']  
-  });
+        title: '首頁',  
+        users: ['Kai', 'aYen', 'Kyousuke'], 
+        char_type: req.query.char_type
+    });
 });
+//modify null and single to array
+function preproc(array){
+    var ret = [];
+    if (array == null){
+        return ret;
+    }
+    else if (array.length == 1){
+        ret.push(array);
+        return ret;
+    }
+    else
+        return array;
+}
+function classfunc(element){
+    return Object.keys(classmap)[element];
+}
+function packfunc(element){
+    return Object.keys(packmap)[element];
+}
+function typefunc(element){
+    return Object.keys(typemap)[element];
+}
+function rarityfunc(element){
+    return Object.keys(raritymap)[element];
+}
+function costfunc(element){
+    return Number(element)+1;
+}
+
+
+app.get('/test2', function(req, res){
+    console.log(req.query.char_type);
+    
+    var q_class = preproc(req.query.class_).map(classfunc);
+    var q_pack = preproc(req.query.pack).map(packfunc);
+    var q_type = preproc(req.query.char_type).map(typefunc); //queries
+    var q_rarity = preproc(req.query.rarity).map(rarityfunc);
+    var q_cost = preproc(req.query.cost).map(costfunc);
+    if(q_cost.indexOf(10) > -1) q_cost.push(18);
+    
+    //build up the final query
+    var query = {};
+    if(req.query.card_name){
+        query['name_ch']= new RegExp(req.query.card_name, "i");
+    }
+    if(q_class.length != 0){
+        query['detail.class']={ $in: q_class};
+    }
+    if(q_pack.length != 0){
+        query['detail.pack']={ $in: q_pack};
+    }
+    if(q_type.length != 0){
+        query['detail.type']={ $in: q_type};
+    }
+    if(q_rarity.length != 0){
+        query['detail.rarity'] = { $in: q_rarity};
+    }
+    if(q_cost.length != 0){
+        query['detail.cost'] = { $in: q_cost};
+    }
+    console.log(query);
+    //query the db
+    db.collection(CARDS_COLLECTION).find(query).toArray(
+        function(err, doc){
+            //console.log(doc);
+            res.render('pages/test', {  
+                title: '首頁',  
+                users: ['Kai', 'aYen', 'Kyousuke'],
+                card_name:req.query.card_name,
+                class_: req.query.class_ ,
+                pack: req.query.pack,
+                char_type: req.query.char_type,
+                rarity: req.query.rarity,
+                cost: req.query.cost,
+                cards:doc
+            });
+        }
+        
+    );
+    
+});
+
 
 app.get('/card/:id', function (req, res) {
     db.collection(CARDS_COLLECTION).find({_id:req.params.id}).toArray(
@@ -573,3 +667,29 @@ function getRandomInt(min, max) {
   max = Math.floor(max);
   return Math.floor(Math.random() * (max - min)) + min;
 }
+
+ 
+
+app.get('/revlo', function (req, res) {
+    var sender = req.query.s, num = req.query.n, receiver = req.query.r;
+    var msg = req.query.m, err_msg = req.query.e; 
+    if (receiver == null)
+        receiver = sender;
+    revlo.get.points(sender).then(data => {
+        var mypoint = data.loyalty.current_points;
+        if(mypoint < num)
+            res.send(sender + err_msg);
+        else{
+            revlo.post.bonus(sender, {
+                amount: -1*Number(num),
+            }).then(data => {
+                revlo.post.bonus(receiver, {
+                    amount: Number(num),
+                }).then(data => {
+                    res.send(sender + "買給" + receiver + msg);
+                }, console.error);
+            }, console.error);
+        }
+    }, console.error);
+    
+})
