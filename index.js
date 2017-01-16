@@ -744,4 +744,41 @@ app.get('/revlo_transfer', function (req, res) {
 
 })
 
+app.get('/gamble', function (req, res) {
+    var user = req.query.user;
+    var num = Number(req.query.bet);
+    revlo.get.points(user).then(data => {
+        var mypoint = data.loyalty.current_points;
+        if(mypoint < num)
+            res.send(user + " 沒錢先挖礦 再來賭博好爆 Kappa");
+        else{
+            //roll
+            var str = user, bonus;
+            var roll = getRandomInt(1,101);
+            str += " 骰出 " + roll + "，";
 
+            if(roll <= 60){
+                str += num + "個麵包掉到地上了 (;´༎ຶД༎ຶ`)";
+                if(roll == 1)
+                    str += "。原來你是地選之人 StoneLightning ";
+                bonus = -1*num;
+            }
+            else if(roll <= 98){
+                str += "挖到"+num*2+"個麵包 (ﾉ>ω<)ﾉ";
+                bonus = num;
+            }
+            else{
+                str += "挖到"+num*10+"個麵包。天選之人4你 ╮(′～‵〞)╭";
+                bonus = num*9;
+            }
+
+            //send
+            revlo.post.bonus(user, {
+                amount: bonus,
+            }).then(data => {
+                res.send(str);
+            }, console.error);
+        }
+    }, console.error);    
+
+})
