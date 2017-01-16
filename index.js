@@ -701,8 +701,10 @@ app.get('/revlo_transfer', function (req, res) {
     var sender = req.query.s, arg = req.query.r.toLowerCase();
     var example = " 範例: !轉帳 shanasaikou 87";
     //split and check input
-    if (arg == "null")
+    if (arg == "null"){
         res.send("沒輸東西是要轉什麼啦 (╬ಠ益ಠ)" + example); 
+        return;
+    }
     var argv = arg.split(" ");
     var receiver, num;
     if (argv.length == 1){
@@ -747,6 +749,10 @@ app.get('/revlo_transfer', function (req, res) {
 app.get('/gamble', function (req, res) {
     var user = req.query.user;
     var num = Number(req.query.bet);
+    if(isNaN(num)){
+        res.send("要賭不要輸錯數字啦 (╬ಠ益ಠ)"); 
+        return;
+    }
     revlo.get.points(user).then(data => {
         var mypoint = data.loyalty.current_points;
         if(mypoint < num)
