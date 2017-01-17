@@ -812,4 +812,17 @@ app.get('/assemble', function(req, res){
 })
 
 
-
+app.get('/look', function (req, res) {
+    var str = [
+                'acs142',
+                '爐心',
+                'ss',
+                'Erickraz',
+                '黑430',
+                'noahsET',
+                'Akh1283954',
+                'Moobot',
+                'revlobot'
+                ];
+    res.send(str[getRandomInt(0,str.length)]);
+})
