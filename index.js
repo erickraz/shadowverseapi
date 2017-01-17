@@ -43,11 +43,11 @@ var typemap = {
     'amulet': "護符"
 }
 
-// var typemapr = {
-//     '隨從': "follower",
-//     '法術': "spell",
-//     '護符': "spell"
-// }
+var typemapr = {
+    '隨從': "follower",
+    '法術': "spell",
+    '護符': "amulet"
+}
 var traitmap = {
     '-': "-",
     'Officer': "士兵",
@@ -250,6 +250,120 @@ app.get('/update', function (req, res) {
 
 
     res.send("initialized");
+})
+
+
+app.get('/api', function (req, res) {
+    var arg = req.query.arg, num, name_ch, class_="", type="";
+    var example = "指令錯誤喔 範例: !卡片 566, !卡片 貞德 , !卡片 法 5, !卡片 皇 756, !卡片 皇 護符 5";
+    if(arg == "null"){
+        res.send(example);
+        return;
+    }
+    var argv = arg.split(" ");
+    var query = {};
+    var err_msg;
+    if(argv.length == 1){
+        num = Number(argv[0]);
+        if (isNaN(num)){
+            query['name_ch'] = new RegExp(argv[0], "i");
+            err_msg = "沒有找到卡片: "+argv[0];
+        }
+        else{
+            query['alt'] = new RegExp(argv[0]);
+            err_msg = "沒有找到"+ num +"隨從";
+        }
+    }
+    else if (argv.length == 2){
+        //parse num
+        num = Number(argv[1]);
+        var msg_num;
+        if (isNaN(num)){
+            res.send(example);
+            return;
+        }
+        else{
+            if(num > 100){
+                query['alt'] = new RegExp(argv[1]);
+                msg_num = argv[1];
+            }
+            else {
+                query['detail.cost'] = num;
+                msg_num = argv[1] + "pp";
+            }
+        }
+        //parse class or type
+        var regex = new RegExp(argv[0], "i");
+        for(var key in classmapr){
+            if(regex.test(key))
+                class_ = classmapr[key];
+        }
+        for(var key in typemapr){
+            if(regex.test(key))
+                type = typemapr[key];
+        }
+        if(class_ != ""){
+            query['detail.class'] = class_;
+            err_msg = "沒有找到"+classmap[class_]+msg_num+"卡片";
+        }
+        else if(type != ""){
+            query['detail.type'] = type;
+            err_msg = "沒有找到"+msg_num+typemap[type];
+        }
+        else{
+            res.send(example);
+        }
+    }
+    else if (argv.length == 3){
+        //parse num
+        num = Number(argv[2]);
+        var msg_num;
+        if (isNaN(num)){
+            res.send(example);
+            return;
+        }
+        else{
+            if(num > 100){
+                query['alt'] = new RegExp(argv[2]);
+                msg_num = argv[2];
+            }
+            else {
+                query['detail.cost'] = num;
+                msg_num = argv[2] + "pp";
+            }
+        }
+        //parse class and type
+        var regex = new RegExp(argv[0], "i");
+        for(var key in classmapr){
+            if(regex.test(key))
+                class_ = classmapr[key];
+        }
+        if(class_ != ""){
+            query['detail.class'] = class_;
+        }
+        else{
+            res.send(example);
+        }
+        regex = new RegExp(argv[1], "i");
+        for(var key in typemapr){
+            if(regex.test(key))
+                type = typemapr[key];
+        }
+        if(type != ""){
+            query['detail.type'] = type;
+        }
+        else{
+            res.send(example);
+        }
+        err_msg = "沒有找到"+classmap[class_]+msg_num+typemap[type];
+    }
+
+    db.collection(CARDS_COLLECTION).find(query).toArray(
+        function(err, doc){
+            res_ch(err,doc,req, res, err_msg);
+        }
+    );
+    
 })
 
 
