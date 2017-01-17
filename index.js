@@ -256,8 +256,8 @@ app.get('/update', function (req, res) {
 app.get('/api', function (req, res) {
     var arg = req.query.arg, num, name_ch, class_="", type="";
     var example = "指令錯誤喔 範例: !卡片 566, !卡片 貞德 , !卡片 法 5, !卡片 皇 756, !卡片 皇 護符 5";
-    if(arg == "null"){
-        res.send(example);
+    if(arg == "null" || arg == ""){
+        res.send("範例: !卡片 566, !卡片 貞德 , !卡片 法 5, !卡片 皇 756, !卡片 皇 護符 5");
         return;
     }
     var argv = arg.split(" ");
