@@ -516,7 +516,7 @@ function res_ch(err, doc, req, res, nfound){
 }
 
 app.get('/rolls', function (req, res) {
-    var user = req.query.u;
+    var user = req.query.u.toLowerCase();
     revlo.get.points(user).then(data => {
         var mypoint = data.loyalty.current_points;
         if(mypoint < 10)
