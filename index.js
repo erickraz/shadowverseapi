@@ -766,7 +766,7 @@ app.get('/assemble', function(req, res){
         if (argv.length == 1){
             receiver = argv[0];
         }
-        else if (argv.length == 2){
+        else if (argv.length >= 2){
             sender = argv[0];
             receiver = argv[1];
         }
