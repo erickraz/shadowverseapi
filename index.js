@@ -254,10 +254,18 @@ app.get('/update', function (req, res) {
 
 
 app.get('/api', function (req, res) {
-    var arg = req.query.arg, num, name_ch, class_="", type="";
-    var example = "指令錯誤喔 範例: !卡片 566, !卡片 貞德 , !卡片 法 5, !卡片 皇 756, !卡片 皇 護符 5";
+    var arg = req.query.arg, num, name_ch, class_="", type="", example;
+    var cht = req.query.cht;
+    if(cht)
+        example = "指令錯誤喔 範例: !卡片 566, !卡片 貞德 , !卡片 法 5, !卡片 皇 756, !卡片 龍 護符 5";
+    else
+        example = "Invalid input argument. Ex: !card 566, !card forte , !card rune 5, !card sword 756, !card dra amulet 5";
+    //parsing...
     if(arg == "null" || arg == ""){
-        res.send("範例: !卡片 566, !卡片 貞德 , !卡片 法 5, !卡片 皇 756, !卡片 皇 護符 5");
+        if(cht)
+            res.send("範例: !卡片 566, !卡片 貞德 , !卡片 法 5, !卡片 皇 756, !卡片 皇 護符 5");
+        else
+            res.send("Ex: !card 566, !card forte , !card rune 5, !card sword 756, !card dra amulet 5");
         return;
     }
     var argv = arg.split(" ");
@@ -266,12 +274,21 @@ app.get('/api', function (req, res) {
     if(argv.length == 1){
         num = Number(argv[0]);
         if (isNaN(num)){
-            query['name_ch'] = new RegExp(argv[0], "i");
-            err_msg = "沒有找到卡片: "+argv[0];
+            if(cht){
+                query['name_ch'] = new RegExp(argv[0], "i");
+                err_msg = "沒有找到卡片: "+argv[0];
+            }
+            else{
+                query['name'] = new RegExp(argv[0], "i");
+                err_msg = "No cards found for name: "+argv[0];
+            }
         }
         else{
             query['alt'] = new RegExp(argv[0]);
-            err_msg = "沒有找到"+ num +"隨從";
+            if(cht)
+                err_msg = "沒有找到"+ num +"隨從";
+            else
+                err_msg = "No cards found for "+ num +" follower";
         }
     }
     else if (argv.length == 2){
@@ -294,21 +311,40 @@ app.get('/api', function (req, res) {
         }
         //parse class or type
         var regex = new RegExp(argv[0], "i");
-        for(var key in classmapr){
-            if(regex.test(key))
-                class_ = classmapr[key];
+        if(cht){
+            for(var key in classmapr){
+                if(regex.test(key))
+                    class_ = classmapr[key];
+            }
+            for(var key in typemapr){
+                if(regex.test(key))
+                    type = typemapr[key];
+            }
         }
-        for(var key in typemapr){
-            if(regex.test(key))
-                type = typemapr[key];
+        else{
+            for(var key in classmap){
+                if(regex.test(key))
+                    class_ = key;
+            }
+            for(var key in typemap){
+                if(regex.test(key))
+                    type = key;
+            }
         }
+        //check which type of arg is the first one
         if(class_ != ""){
             query['detail.class'] = class_;
-            err_msg = "沒有找到"+classmap[class_]+msg_num+"卡片";
+            if(cht)
+                err_msg = "沒有找到"+classmap[class_]+msg_num+"卡片";
+            else
+                err_msg = "No cards found for "+class_+" "+msg_num+" card";
         }
         else if(type != ""){
             query['detail.type'] = type;
-            err_msg = "沒有找到"+msg_num+typemap[type];
+            if(cht)
+                err_msg = "沒有找到"+msg_num+typemap[type];
+            else
+                err_msg = "No cards found for "+msg_num+" "+type;                
         }
         else{
             res.send(example);
@@ -332,11 +368,19 @@ app.get('/api', function (req, res) {
                 msg_num = argv[2] + "pp";
             }
         }
-        //parse class and type
+        //parse class
         var regex = new RegExp(argv[0], "i");
-        for(var key in classmapr){
-            if(regex.test(key))
-                class_ = classmapr[key];
+        if(cht){
+            for(var key in classmapr){
+                if(regex.test(key))
+                    class_ = classmapr[key];
+            }
+        }
+        else{
+            for(var key in classmap){
+                if(regex.test(key))
+                    class_ = key;
+            }
         }
         if(class_ != ""){
             query['detail.class'] = class_;
@@ -344,10 +388,19 @@ app.get('/api', function (req, res) {
         else{
             res.send(example);
         }
+        //parse type
         regex = new RegExp(argv[1], "i");
-        for(var key in typemapr){
-            if(regex.test(key))
-                type = typemapr[key];
+        if(cht){
+            for(var key in typemapr){
+                if(regex.test(key))
+                    type = typemapr[key];
+            }
+        }
+        else{
+            for(var key in typemap){
+                if(regex.test(key))
+                    type = key;
+            }
         }
         if(type != ""){
             query['detail.type'] = type;
@@ -355,235 +408,24 @@ app.get('/api', function (req, res) {
         else{
             res.send(example);
         }
-        err_msg = "沒有找到"+classmap[class_]+msg_num+typemap[type];
+
+        if(cht)
+            err_msg = "沒有找到"+classmap[class_]+msg_num+typemap[type];
+        else
+            err_msg = "No cards found for "+class_+" "+msg_num+" "+type;
     }
 
     db.collection(CARDS_COLLECTION).find(query).toArray(
         function(err, doc){
-            res_ch(err,doc,req, res, err_msg);
+            if(cht)
+                res_ch(err,doc,req, res, err_msg);
+            else
+                res_eng(err,doc,req, res, err_msg);
         }
     );
     
 })
 
-
-app.get('/name=:id', function (req, res) {
-    db.collection(CARDS_COLLECTION).find({'name': new RegExp(req.params.id, "i")}).toArray(
-        function(err, doc){
-            var nfound = "No cards found for name: " + req.params.id;
-            res_eng(err,doc,req, res, nfound);
-        }
-    );
-    
-})
-
-app.get('/name_ch=:id', function (req, res) {
-
-    db.collection(CARDS_COLLECTION).find({'name_ch': new RegExp(req.params.id, "i")}).toArray(
-        function(err, doc){
-            var nfound = "沒有找到卡片: " + req.params.id;
-            res_ch(err,doc,req, res, nfound);
-        }
-    );
-    
-})
-
-app.get('/cost=:id', function (req, res) {
-    var argv = req.params.id.split(" ");
-    var cur_class = "", cur_cost;
-    var err_msg = "Invalid input argument. Ex: !amulet blood 566";
-
-    var ret = parse_ch(argv, res, err_msg, true);
-    if (ret == -1)
-        return;
-    cur_class = ret.cur_class;
-    cur_cost = new RegExp(ret.cur_cost.toString());
-
-    db.collection(CARDS_COLLECTION).find({'detail.class': cur_class,'alt': cur_cost, 'detail.type': "follower"}).toArray(
-        function(err, doc){
-            var nfound = "No cards found for " + (argv.length==1?"":cur_class) + " " + cur_cost + "follower";
-            res_eng(err,doc,req, res, nfound);
-        }
-    );
-    
-})
-
-
-app.get('/cost_ch=:id', function (req, res) {
-    var argv = req.params.id.split(" ");
-    var cur_class = "", cur_cost;
-    var err_msg = "指令錯誤喔 範例: !費用 血 566";
-
-    var ret = parse_ch(argv, res, err_msg);
-    if (ret == -1)
-        return;
-    cur_class = ret.cur_class;
-    cur_cost = new RegExp(ret.cur_cost.toString());
-
-    db.collection(CARDS_COLLECTION).find({'detail.class': cur_class,'alt': cur_cost, 'detail.type': "follower"}).toArray(
-        function(err, doc){
-            var nfound = "沒有找到" + (argv.length==1?"":classmap[cur_class]) + cur_cost + "隨從";
-            res_ch(err,doc,req, res, nfound);
-        }
-    );
-})
-
-app.get('/follower=:id', function (req, res) {
-    var argv = req.params.id.split(" ");
-    var cur_class = "", cur_cost;
-    var err_msg = "Invalid input argument. Ex: !follower blood 5";
-
-    var ret = parse_ch(argv, res, err_msg, true);
-    if (ret == -1)
-        return;
-    cur_class = ret.cur_class;
-    cur_cost = ret.cur_cost;
-
-    db.collection(CARDS_COLLECTION).find({'detail.class': cur_class,'detail.cost': cur_cost, 'detail.type': "follower"}).toArray(
-        function(err, doc){
-            var nfound = "No cards found for " + (argv.length==1?"":cur_class) + " " + cur_cost + "pp follower";
-            res_eng(err,doc,req, res, nfound);
-        }
-    );
-    
-})
-
-app.get('/follower_ch=:id', function (req, res) {
-    var argv = req.params.id.split(" ");
-    var cur_class = "", cur_cost;
-    var err_msg = "指令錯誤喔 範例: !隨從 血 5";
-
-    var ret = parse_ch(argv, res, err_msg);
-    if (ret == -1)
-        return;
-    cur_class = ret.cur_class;
-    cur_cost = ret.cur_cost;
-
-    db.collection(CARDS_COLLECTION).find({'detail.class': cur_class,'detail.cost': cur_cost, 'detail.type': "follower"}).toArray(
-        function(err, doc){
-            var nfound = "沒有找到" + (argv.length==1?"":classmap[cur_class]) + cur_cost + "pp隨從";
-            res_ch(err,doc,req, res, nfound);
-        }
-    );
-})
-
-app.get('/amulet=:id', function (req, res) {
-    var argv = req.params.id.split(" ");
-    var cur_class = "", cur_cost;
-    var err_msg = "Invalid input argument. Ex: !amulet sword 3";
-
-    var ret = parse_ch(argv, res, err_msg, true);
-    if (ret == -1)
-        return;
-    cur_class = ret.cur_class;
-    cur_cost = ret.cur_cost;
-
-    db.collection(CARDS_COLLECTION).find({'detail.class': cur_class,'detail.cost': cur_cost, 'detail.type': "amulet"}).toArray(
-        function(err, doc){
-            var nfound = "No cards found for " + (argv.length==1?"":cur_class) + " " + cur_cost + "pp amulet";
-            res_eng(err,doc,req, res, nfound);
-        }
-    );
-    
-})
-
-app.get('/amulet_ch=:id', function (req, res) {
-    var argv = req.params.id.split(" ");
-    var cur_class = "", cur_cost;
-    var err_msg = "指令錯誤喔 範例: !法術 皇 3";
-
-    var ret = parse_ch(argv, res, err_msg);
-    if (ret == -1)
-        return;
-    cur_class = ret.cur_class;
-    cur_cost = ret.cur_cost;
-
-    db.collection(CARDS_COLLECTION).find({'detail.class': cur_class,'detail.cost': cur_cost, 'detail.type': "amulet"}).toArray(
-        function(err, doc){
-            var nfound = "沒有找到" + (argv.length==1?"":classmap[cur_class]) + cur_cost + "pp護符";
-            res_ch(err,doc,req, res, nfound);
-        }
-    );
-})
-
-app.get('/spell=:id', function (req, res) {
-    var argv = req.params.id.split(" ");
-    var cur_class = "", cur_cost;
-    var err_msg = "Invalid input argument. Ex: !spell Fore 6, !spell sword 5";
-
-    var ret = parse_ch(argv, res, err_msg, true);
-    if (ret == -1)
-        return;
-    cur_class = ret.cur_class;
-    cur_cost = ret.cur_cost;
-
-    db.collection(CARDS_COLLECTION).find({'detail.class': cur_class,'detail.cost': cur_cost, 'detail.type': "spell"}).toArray(
-        function(err, doc){
-            var nfound = "No cards found for " + (argv.length==1?"":cur_class) + " " + cur_cost + "pp spell";
-            res_eng(err,doc,req, res, nfound);
-        }
-    );
-    
-})
-app.get('/spell_ch=:id', function (req, res) {
-    var argv = req.params.id.split(" ");
-    var cur_class = "", cur_cost;
-    var err_msg = "指令錯誤喔 範例: !法術 妖 6, !法術 皇家 5";
-
-    var ret = parse_ch(argv, res, err_msg);
-    if (ret == -1)
-        return;
-    cur_class = ret.cur_class;
-    cur_cost = ret.cur_cost;
-
-    db.collection(CARDS_COLLECTION).find({'detail.class': cur_class,'detail.cost': cur_cost, 'detail.type': "spell"}).toArray(
-        function(err, doc){
-            var nfound = "沒有找到" + (argv.length==1?"":classmap[cur_class]) + cur_cost + "pp法術";
-            res_ch(err,doc,req, res, nfound);
-        }
-    );
-})
-
-function parse_ch(argv, res, err_msg, eng){
-    var cur_class="", cur_cost;
-    if (argv.length == 2){
-            var regex = new RegExp(argv[0], "i");
-            if(!eng){
-                for(var key in classmapr){
-                    if(regex.test(key))
-                        cur_class = classmapr[key];
-                }
-            }
-            else{
-                for(var key in classmap){
-                    if(regex.test(key))
-                        cur_class = key;
-                }
-            }
-            if(cur_class == ""){
-                res.send(err_msg);
-                return -1;
-            }
-            cur_cost = Number(argv[1]);
-        }
-        else if (argv.length == 1){
-            cur_class = RegExp("");
-            cur_cost = Number(argv[0]);
-            if(isNaN(cur_cost)){
-                res.send(err_msg);
-                return -1;
-            }
-
-        }
-        else if (argv.length > 2 || argv.length == 0){
-            res.send(err_msg);
-            return -1;
-    }
-    return {
-        cur_class: cur_class,
-        cur_cost: cur_cost
-    };
-}
 
 function res_eng(err, doc, req, res, nfound){
     if(err) {
@@ -591,6 +433,7 @@ function res_eng(err, doc, req, res, nfound){
     }
     if(doc.length == 0){
         res.send(nfound);
+        return;
     }
     else{
         if(doc.length==1){
@@ -613,6 +456,7 @@ function res_eng(err, doc, req, res, nfound){
             }
 
             res.send(str);
+            return;
 
         }
         else{
@@ -621,6 +465,7 @@ function res_eng(err, doc, req, res, nfound){
                 str += card.name + " | ";
             });
             res.send(str);
+            return;
         }
         
     }
@@ -633,6 +478,7 @@ function res_ch(err, doc, req, res, nfound){
     }
     if(doc.length == 0){
         res.send(nfound);
+        return;
     }
     else{
         if(doc.length==1){
@@ -655,7 +501,7 @@ function res_ch(err, doc, req, res, nfound){
             }
 
             res.send(str);
-
+            return;
         }
         else{
             var str = "多項符合: | "
@@ -663,6 +509,7 @@ function res_ch(err, doc, req, res, nfound){
                 str += card.name_ch + " | ";
             });
             res.send(str);
+            return;
         }
         
     }
