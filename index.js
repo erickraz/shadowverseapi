@@ -714,6 +714,10 @@ app.get('/gamble', function (req, res) {
         res.send("要賭不要輸錯數字啦 (╬ಠ益ಠ)"); 
         return;
     }
+    if(num <= 0){
+        res.send("賭負的麵包 你4不4有什麼企圖 ಠ_ಠ"); 
+        return;
+    }
     revlo.get.points(user).then(data => {
         var mypoint = data.loyalty.current_points;
         if(mypoint < num)
