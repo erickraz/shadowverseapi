@@ -617,7 +617,7 @@ function getRandomInt(min, max) {
 
  
 function revlocommands(req, res, num, msg, err_msg){
-    var sender = req.query.s, receiver = req.query.r.toLowerCase();
+    var sender = req.query.s.toLowerCase(), receiver = req.query.r.toLowerCase();
     if (receiver == "null")
         receiver = sender;
     revlo.get.points(receiver).then(data=> {
@@ -708,7 +708,7 @@ app.get('/revlo_transfer', function (req, res) {
 })
 
 app.get('/gamble', function (req, res) {
-    var user = req.query.user;
+    var user = req.query.user.toLowerCase();
     var num = Number(req.query.bet);
     if(isNaN(num)){
         res.send("要賭不要輸錯數字啦 (╬ಠ益ಠ)"); 
