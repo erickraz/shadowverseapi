@@ -710,18 +710,22 @@ app.get('/revlo_transfer', function (req, res) {
 app.get('/gamble', function (req, res) {
     var user = req.query.user.toLowerCase();
     var num = Number(req.query.bet);
+    var ante = Number(req.query.ante);
     if(isNaN(num)){
-        res.send("要賭不要輸錯數字啦 (╬ಠ益ಠ)"); 
+        res.send(user+" :要賭不要輸錯數字啦 (╬ಠ益ಠ)"); 
         return;
     }
-    if(num <= 0){
-        res.send("賭負的麵包 你4不4有什麼企圖 ಠ_ಠ"); 
+    if(num < 0){
+        res.send(user+" :賭負的麵包 你4不4有什麼企圖 ಠ_ಠ"); 
         return;
+    }
+    else if(num < ante){
+        res.send(user+" :底注是"+ante+"個麵包喔 VoHiYo");
     }
     revlo.get.points(user).then(data => {
         var mypoint = data.loyalty.current_points;
         if(mypoint < num)
-            res.send(user + " 沒錢先挖礦 再來賭博好爆 Kappa");
+            res.send(user + " :沒錢先挖礦 再來賭博好爆 Kappa");
         else{
             //roll
             var str = user, bonus;
