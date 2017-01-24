@@ -817,9 +817,17 @@ app.get('/assemble', function(req, res){
 })
 
 
-var time = require('time');
+
 
 app.get('/probability', function(req, res){
+    var time ;
+    try {
+      time = require('time');
+    } catch (err) {
+      res.send('time support is disabled!');
+      return
+    }
+
     var offset = Number(req.query.offset), prefix;
     time.tzset('UTC-8');
     var now = new time.Date()/1000; //now in sec
