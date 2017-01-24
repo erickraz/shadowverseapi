@@ -836,6 +836,7 @@ app.get('/open', function(req, res){
     //var b=0, s=0, g=0, l=0;
     var sender = req.query.sender;
     var str = sender + " 開出: | ";
+    var rating = 0;
     for(var i = 0; i < 8; ++i){
         var r = getRandomInt(0,1000);
         var animated = getRandomInt(0,25);
@@ -853,13 +854,44 @@ app.get('/open', function(req, res){
         }
         else if(r < 985){
             str += "金"
+            rating = 1;
         }
         else{
             str += "虹"
+            rating = 2;
         }
 
         str += " | "
     }
-    str += " TakeNRG";
+    if(rating == 2){
+        var comments = [
+                    '歐洲人 (#ﾟ⊿`)凸',
+                    '要不要買樂透 ｡:.ﾟヽ(*´∀`)ﾉﾟ.:｡',
+                    '抽到虹卡 先燒了再說 CurseLit CurseLit CurseLit',
+                    '都給你抽就好啊 糞game (ﾉ｀□´)ﾉ⌒┻━┻'
+                    ];
+        str += comments[getRandomInt(0,comments.length)];
+    }
+    else if(rating == 1){
+        var comments = [
+                    '可以接受 < (￣︶￣)>',
+                    '教練 我好想抽虹卡rrr ( ˘•ω•˘ )',
+                    '普普通通啦 ʅ（´◔౪◔）ʃ',
+                    '至...至少有金卡 BrokeBack'
+                    ];
+        str += comments[getRandomInt(0,comments.length)];
+    }
+    else if(rating == 0){
+        var comments = [
+                    '臉很黑喔 StoneLightning',
+                    '大酋長好 敬禮!( ￣□￣)/  <(￣ㄧ￣ ) <(￣ㄧ￣ ) <(￣ㄧ￣ )',
+                    '太...太非了吧 _(´ཀ`」 ∠)_',
+                    '非洲暢遊包 (╥﹏╥)',
+                    '運氣很差 記得多積陰德 (σ′▽‵)′▽‵)σ'
+                    ];
+        str += comments[getRandomInt(0,comments.length)];
+    }
+
+    
     res.send(str);
 })
