@@ -830,3 +830,36 @@ app.get('/look', function (req, res) {
                 ];
     res.send(str[getRandomInt(0,str.length)]);
 })
+
+app.get('/open', function(req, res){
+
+    //var b=0, s=0, g=0, l=0;
+    var sender = req.query.sender;
+    var str = sender + " 開出: |";
+    for(var i = 0; i < 8; ++i){
+        var r = getRandomInt(0,1000);
+        var animated = getRandomInt(0,25);
+        if(animated < 2)
+            str += "閃";
+
+        if(r < 675){
+            if(i == 8)
+                str += "銀"
+            else
+                str += "銅"
+        }
+        else if(r < 925){
+            str += "銀"
+        }
+        else if(r < 985){
+            str += "金"
+        }
+        else{
+            str += "虹"
+        }
+
+        str += "|"
+    }
+    str += " TakeNRG";
+    res.send(str);
+})
