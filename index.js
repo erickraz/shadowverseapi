@@ -835,7 +835,7 @@ app.get('/open', function(req, res){
 
     //var b=0, s=0, g=0, l=0;
     var sender = req.query.sender;
-    var str = sender + " 開出: |";
+    var str = sender + " 開出: | ";
     for(var i = 0; i < 8; ++i){
         var r = getRandomInt(0,1000);
         var animated = getRandomInt(0,25);
@@ -858,7 +858,7 @@ app.get('/open', function(req, res){
             str += "虹"
         }
 
-        str += "|"
+        str += " | "
     }
     str += " TakeNRG";
     res.send(str);
