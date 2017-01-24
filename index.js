@@ -759,6 +759,19 @@ app.get('/gamble', function (req, res) {
 
 })
 
+//crypto func
+var crypto;
+try {
+  crypto = require('crypto');
+} catch (err) {
+  console.log('crypto support is disabled!');
+}
+function getHashInt(input, secret, M){
+    const hash = crypto.createHmac('sha256', secret).update(input).digest('hex');
+    var n = parseInt(hash.substring(60),16);
+    return n%M;
+}
+
 app.get('/assemble', function(req, res){
     var sender = req.query.sender, arg = req.query.arg, receiver;
     //split and check input
@@ -776,21 +789,9 @@ app.get('/assemble', function(req, res){
         }
     }
 
-    //crypto func
-    var crypto;
-    try {
-      crypto = require('crypto');
-    } catch (err) {
-      console.log('crypto support is disabled!');
-    }
-    function getHashInt(person, M){
-        const secret = '0';
-        const hash = crypto.createHmac('sha256', secret).update(person).digest('hex');
-        var n = parseInt(hash.substring(60),16);
-        return n%M;
-    }
     // get the assemble percentage
-    var h1 = getHashInt(sender,100), h2 = getHashInt(receiver,100);
+    key = '0';
+    var h1 = getHashInt(sender, key,100), h2 = getHashInt(receiver, key,100);
     var a = h1-h2;
     if(a < 0) a *= -1;
     a = 100 - a;
@@ -814,6 +815,61 @@ app.get('/assemble', function(req, res){
         str += " 完全不像 BibleThump";
     res.send(str);
 })
+
+
+var time = require('time');
+
+app.get('/probability', function(req, res){
+    var offset = Number(req.query.offset), prefix;
+    time.tzset('UTC-8');
+    var now = new time.Date()/1000; //now in sec
+    date_obj = time.localtime(now+offset*86400);
+    var year = date_obj.year+1900, month = date_obj.month+1, day = date_obj.dayOfMonth;
+    obj = {
+        'year': year,
+        'month': month,
+        'day': day
+    }
+    
+    if(offset == 0){
+        prefix = "今天";
+    }
+    else if(offset == 1){
+        prefix = "明天";
+    }
+    else if(offset == -1){
+        prefix = "昨天";
+    }
+    date_percentage(req, res, prefix, obj);
+
+})
+function date_percentage(req, res, prefix, obj){
+    var arg = req.query.arg;
+    if (arg == "null"){
+        res.send(prefix+"日期是: "+obj.year+"年"+obj.month+"月"+obj.day+"日");
+        return;
+    }
+
+    key = obj.year*10000+obj.month*100+obj.day;
+    var h1 = getHashInt(arg, key.toString(),100);
+
+
+    //post process
+    var str = "";
+    str += prefix+" " + arg + " 的機率是" + h1 + "% ";
+    if(h1 > 80)
+        str += " Kreygasm ";
+    else if (h1 > 60)
+        str += " VoHiYo";
+    else if (h1 > 40)
+        str += " GivePLZ";
+    else if (h1 > 20)
+        str += " FailFish";
+    else 
+        str += " BibleThump";
+    res.send(str);
+
+}
 
 
 app.get('/look', function (req, res) {
@@ -844,7 +900,7 @@ app.get('/open', function(req, res){
             str += "閃";
 
         if(r < 675){
-            if(i == 8)
+            if(i == 7)
                 str += "銀"
             else
                 str += "銅"
@@ -868,7 +924,8 @@ app.get('/open', function(req, res){
                     '歐洲人 (#ﾟ⊿`)凸',
                     '要不要買樂透 ｡:.ﾟヽ(*´∀`)ﾉﾟ.:｡',
                     '抽到虹卡 先燒了再說 CurseLit CurseLit CurseLit',
-                    '都給你抽就好啊 糞game (ﾉ｀□´)ﾉ⌒┻━┻'
+                    '都給你抽就好 糞game (ﾉ｀□´)ﾉ⌒┻━┻',
+                    '可以 這很歐洲 d(`･∀･)b'
                     ];
         str += comments[getRandomInt(0,comments.length)];
     }
