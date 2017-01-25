@@ -721,6 +721,7 @@ app.get('/gamble', function (req, res) {
     }
     else if(num < ante){
         res.send(user+" :底注是"+ante+"個麵包喔 VoHiYo");
+        return;
     }
     revlo.get.points(user).then(data => {
         var mypoint = data.loyalty.current_points;
@@ -825,7 +826,7 @@ app.get('/probability', function(req, res){
       time = require('time');
     } catch (err) {
       res.send('time support is disabled!');
-      return
+      return;
     }
 
     var offset = Number(req.query.offset), prefix;
