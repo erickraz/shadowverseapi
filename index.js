@@ -68,7 +68,7 @@ var packmap ={
 }
 
 app.get('/', function(req, res) {
-  response.render('pages/index');
+  res.render('pages/index');
 });
 
 
