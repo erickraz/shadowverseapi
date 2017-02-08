@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h3 align="center">Shadowverse 引繼碼小幫手</h3>
+
+<style>
+body{
+  font-size: 16px;
+}
+input.link{
+  width: 250px ;
+  font-size: 16px;
+}
+input.link-imgur{
+  font-size: 16px;
+}
+
+.button-imgur{
+  background-color: #1bb76e;
+  border: none;
+  color: white;
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  border-radius: 4px;
+}
+.button-imgur:hover {
+  background: #50a144;
+  text-decoration: none;
+}
+.button-copy{
+  background-color: #636FFF;
+  border: none;
+  color: white;
+  padding: 2px 22px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+}
+.box1 {
+  display: block;
+  width: 800px;
+  height: auto;
+  margin: 0px auto;
+}
+.box2 {
+  background-color : #EEE;
+  display: block;
+  width: 800px;
+  height: 400px;
+  margin: 0px auto;
+}
+.display{
+  margin: 20px auto;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+.switch input {display:none;}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: #2196F3;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 2px;
+}
+
+.slider.round:before {
+  border-radius: 2px;
+}
+
+.arrow_box {
+  display:none;
+  width: auto;
+  position: relative;
+  background: #a4becf;
+  color: white;
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  font-size: 16px;
+  margin: 4px 2px;
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  border-radius: 4px;
+}
+.arrow_box:after, .arrow_box:before {
+  right: 100%;
+  top: 50%;
+  border: solid transparent;
+  content: " ";
+  height: 0;
+  width: 0;
+  position: absolute;
+  pointer-events: none;
+}
+
+.arrow_box:after {
+  border-color: rgba(164, 190, 207, 0);
+  border-right-color: #a4becf;
+  border-width: 8px;
+  margin-top: -8px;
+} 
+
+</style>
+
+<div class = "box1">
+<form action="/deck" id="req_form">
+  <input type="text" name="deck_code" placeholder="deck code"><br>
+  <input type="submit" value="Submit">
+  <input type="hidden" name="history">
+</form>
+</div>
+
+  
+
+
+<% if(locals.hash || locals.history){ %>
+<% var currentHash = hash%>
+  <div class = "box1">
+    <img id ="img0" src="https://shadowverse-portal.com/image/<%= hash %>?lang=en">
+    <img id ="img1" src="https://shadowverse-portal.com/image/<%= hash %>?lang=jp" style="display: none;">
+
+  </div>
+
+  <div class = "box2">
+  <div>
+  shadowverse portal <a href="https://shadowverse-portal.com/deck/<%= hash %>">連結</a>
+  </div>
+  <div>
+  <input type="text" id="link" class="link" name = "link" value="https://shadowverse-portal.com/deck/<%= hash %>" readonly> 
+  <a id="copylink" class="button-copy" onclick="copyToClipboard(link);">複製</a>
+  </div>
+  <div>
+  <a id="imgurupl" class = "button-imgur" onclick="upload();"><b>Upload to Imgur</b></a>
+  <span id ="span_imgur" class="arrow_box">
+    <input type="text" id="link_imgur" class="link-imgur" name = "link-imgur" readonly> 
+    <a id="copyimgur" class="button-copy" onclick="copyToClipboard(link_imgur);">複製</a>
+  </span>
+  </div>
+  <div>
+  <a id="gooupl" class = "button-imgur" onclick="shorten();"><b>shorthen using goo.gl</b></a>
+  <span id ="span_goo" class="arrow_box">
+    <input type="text" id="link_goo" class="link-imgur" name = "link-goo" readonly> 
+    <a id="copygoo" class="button-copy" onclick="copyToClipboard(link_goo);">複製</a>
+  </span>
+  </div>
+
+  <div>
+  <label class="switch">
+  <input id= "lang_checkbox" type="checkbox" onclick='handleClick(this);'>
+  <div class="slider round"></div>
+  </label>
+  </div>
+  </div>
+<% } %>
+<div id="history" class = "box1">
+  <input type="button" value="清除紀錄" onclick="clearHistory();">
+</div>
+
+<div>
+中文 
+<input type="radio" name="lang" value="zh" id="zh" onclick="submit()" form="req_form" checked>
+英文
+<input type="radio" name="lang" value="en" id="en" onclick="submit()" form="req_form">
+</div>
+
+<script src="/js/jquery-3.1.1.min.js" type="text/javascript"></script>
+<script src="/js/js.cookie.js" type="text/javascript"></script>
+<script>
+$(document).ready(function() {
+  var myForm = document.forms.req_form;
+<% if(locals.deck_code) {%>
+  var myControls = myForm.elements['deck_code'];
+  myControls.value="<%= deck_code%>";
+<% } %>
+<% if(locals.history) {%>
+  myForm.elements['history'].value="<%= history%>";
+<% } %>
+  var langControl = document.getElementById('<%= lang %>');
+  langControl.checked = true;
+
+  handleCookie();
+
+});
+
+function handleCookie(){
+  var maxLen = 3;
+  var decks = JSON.parse(Cookies.get("decks"));
+<% if(locals.hash){ %>
+  var currentHash = "<%=hash%>";
+  var item = { 
+    hash: currentHash,
+    time: (new Date()).toISOString().slice(0,10)
+  };
+  if(decks && decks.history && decks.history.length){
+    var array = decks.history;
+    var index = -1; //array.indexOf(currentHash);
+    for(var i = 0; i < array.length; ++i){
+      if(array[i].hash == currentHash)
+        index = i;
+    }
+    if(index != -1){
+      array.splice(index, 1);
+    }
+    else if(array.length == maxLen){
+      array.splice(maxLen-1,1);
+    }
+    array.unshift(item);
+    decks.history = array;
+    Cookies.set('decks', JSON.stringify(decks), 30);
+  }
+  else{
+    decks = {
+      history: [item]
+    };
+    Cookies.set('decks', JSON.stringify(decks), 30);
+  }
+
+<% } %>
+  console.log(decks);
+  if(decks && decks.history && decks.history.length){
+    for(var i = 0; i < decks.history.length; ++i){
+      var hash = decks.history[i].hash;
+      var divHistory = document.getElementById('history');
+
+      var img = document.createElement('input');
+      img.setAttribute('src',"/images/classes/class"+hash[2]+".png");
+      img.setAttribute('type',"image");
+      img.setAttribute('onclick', 'doit('+i+')');
+      var a = document.createElement('a');
+      a.innerHTML = '建立日期: ' + decks.history[i].time;
+      var div = document.createElement('div');
+      div.appendChild(img);
+      div.appendChild(a);
+      divHistory.appendChild(div);
+    }
+  }
+}
+function clearHistory(){
+  Cookies.set('decks', JSON.stringify({}), 30);
+  window.location.href = '/deck?lang=<%=lang%>';
+}
+function doit(idx){
+  window.location.href = '/deck?lang=<%=lang%>&history='+idx;
+}
+
+function handleClick(cb) {
+  if(cb.checked){
+    document.getElementById("img0").style.display='none';
+    document.getElementById("img1").style.display='block';    
+  }
+  else{
+    document.getElementById("img0").style.display='block';
+    document.getElementById("img1").style.display='none';    
+  }
+}
+
+function upload(){
+  if(document.getElementById("span_imgur").style.display!='inline'){
+    var currentImg = document.getElementById('lang_checkbox').checked ? "img1" : "img0";
+    var uploadurl = document.getElementById(currentImg).src;
+    console.log(uploadurl);
+    $.post('/imgur', { imageurl: uploadurl}, 
+      function(returnedData){
+        console.log(returnedData);
+        if(returnedData.success){
+          document.getElementById("link_imgur").value = returnedData.data.link;
+          $("#span_imgur").fadeIn("slow");
+        }
+        else{
+          document.getElementById("link_imgur").value  = "發生未知的錯誤";
+          $("#span_imgur").fadeIn("slow");
+        }
+    }).fail(function(){
+        document.getElementById("link_imgur").value  = "發生未知的錯誤";
+        $("#span_imgur").fadeIn("slow");
+    });
+  }
+}
+
+function shorten(){
+  if(document.getElementById("span_goo").style.display!='inline'){
+    var longurl = document.getElementById('link').value;
+    console.log(longurl);
+    $.post('/goo', { url: longurl}, 
+      function(returnedData){
+        console.log(returnedData);
+        if(returnedData.id){
+          document.getElementById("link_goo").value = returnedData.id;
+          $("#span_goo").fadeIn("slow");
+        }
+        else{
+          document.getElementById("link_goo").value  = "發生未知的錯誤";
+          $("#span_goo").fadeIn("slow");
+        }
+    }).fail(function(){
+        document.getElementById("link_goo").value  = "發生未知的錯誤";
+        $("#span_goo").fadeIn("slow");
+    });
+  }
+}
+
+function copyToClipboard(elem) {
+    // create hidden text element, if it doesn't already exist
+    var targetId = "_hiddenCopyText_";
+        target = elem;
+
+    // select the content
+    target.focus();
+    target.setSelectionRange(0, target.value.length);
+    
+    // copy the selection
+    var succeed;
+    try {
+        succeed = document.execCommand("copy");
+    } catch(e) {
+        succeed = false;
+    }
+    
+    return succeed;
+}
+</script>
+
+</body>
+</html>
