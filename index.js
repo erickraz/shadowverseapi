@@ -67,7 +67,7 @@ var packmap ={
     'ROB': "巴哈姆特降臨"
 }
 
-app.get('/', function(request, response) {
+app.get('/', function(req, res) {
   response.render('pages/index');
 });
 
@@ -109,6 +109,171 @@ function costfunc(element){
     return Number(element)+1;
 }
 
+var https = require("https"), request = require('request'),
+    fs = require('fs'); 
+var clientId_imgur = "7e5e05d78caf5e3";
+var clientId_goo = 'AIzaSyC9MmJb2ljjoLwB7rcw3cWG5cjPPP8_IR0';
+var langList = ['zh','en'];
+
+
+var bodyParser = require('body-parser');
+app.use(bodyParser.json()); // support json encoded bodies
+app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
+var cookieParser = require('cookie-parser');
+app.use(cookieParser());
+
+app.post('/goo', function(req, res){
+    var url = req.body.url;
+    console.log(req.body.url);
+    var apiurl='https://www.googleapis.com/urlshortener/v1/url?key='+clientId_goo;
+    var option = {
+        url: apiurl,
+        method: "POST",
+        json: {
+            longUrl: url
+        }
+    };
+    function cb(error, response, body) {
+        console.log(body);
+        
+        res.send(body);
+    }
+    request(option, cb);
+    
+});
+
+app.post('/imgur', function(req, res){
+    var imageurl = req.body.imageurl;
+    console.log(req.body.imageurl);
+    var option = {
+        url: 'https://api.imgur.com/3/upload',
+        headers: {
+            Authorization: "Client-ID "+clientId_imgur
+        },
+        method: "POST",
+        form: {
+            image: imageurl
+        }
+    };
+    function cb(error, response, body) {
+        var info = JSON.parse(body);
+        res.send(info);
+    }
+    request(option, cb);
+    
+});
+
+app.get('/deck', function(req1, res1){
+    console.log(req1.query);
+
+    var lang, deck_code = req1.query.deck_code;
+    if(req1.query.lang && langList.indexOf(req1.query.lang) > -1){
+        lang = req1.query.lang;
+    }
+    else {
+        if(req1.acceptsLanguages('zh'))
+            lang = 'zh';
+        else
+            lang = 'en';
+        var link = '/deck?';
+        if(deck_code){
+            link+='deck_code='+deck_code;
+        }
+        else if(req1.query.history){
+            link+='&history='+req1.query.history;
+        }
+        res1.redirect(link+'&lang='+lang);
+        return;
+    }
+
+
+    if(deck_code){
+        var code_path = '/api/v1/deck/import/?format=json&lang='+lang
+            +'&deck_code='+deck_code;
+        
+        var options = {
+            host: 'shadowverse-portal.com',
+            path: code_path,
+            method: 'GET'
+        };
+
+        var req = https.request(options, (res) => {
+            var output = '';
+            res.on('data', (chunk) => {
+                output += chunk;
+            });
+            res.on('end', () => {
+                var obj = JSON.parse(output);
+                console.log(obj);
+                renderPage(obj);
+                //res1.send(obj);
+                /*var imageurl = 'https://shadowverse-portal.com/image/'+obj.data.hash
+                    +'?lang='+lang;
+                var option = {
+                    url: 'https://api.imgur.com/3/upload',
+                    headers: {
+                        Authorization: "Client-ID "+clientId
+                    },
+                    method: "POST",
+                    form: {
+                        image: imageurl
+                    }
+                };
+                function cb(error, response, body) {
+                    if (!error && response.statusCode == 200) {
+                        var info = JSON.parse(body);
+                        console.log(info);
+                    }
+                    else{
+                        console.log("error uploading image");
+                    }
+                }
+                request(option, cb);*/
+            });
+        });
+        req.on('error', (e) => {
+            console.log('problem with request: ' + e.message);
+        });
+
+        
+        req.end();
+    }
+    else{
+        var obj = {};
+        renderPage(obj);      
+    }
+
+    // render page ejs
+    function renderPage(obj){
+        var params = {
+            title: 'deck',
+            lang: lang
+        };
+        if ('data' in obj && 'hash' in obj.data){
+            params['hash'] = obj.data.hash;
+        }
+        if(deck_code){
+            params['deck_code']=deck_code;
+        }
+        else if(req1.query.history){
+            //rearrage cookie and redirect to 0 if history is not zero
+            var idx = req1.query.history;
+            var cookie = JSON.parse(req1.cookies.decks);
+            if(cookie && cookie.history && cookie.history.length != 0){
+                if(idx != 0){
+                    var item = cookie.history[idx];
+                    cookie.history.splice(idx, 1);
+                    cookie.history.unshift(item);
+                    res1.cookie('decks', JSON.stringify(cookie), { maxAge: 86400000*30});
+                    res1.redirect('deck?history=0&lang='+lang);
+                    return;
+                }
+                params['hash']=cookie.history[0].hash;
+            }
+        }
+        res1.render('pages/deck', params);
+    }
+});
 
 app.get('/test2', function(req, res){
     console.log(req.query.char_type);
@@ -161,7 +326,6 @@ app.get('/test2', function(req, res){
     );
     
 });
-
 
 app.get('/card/:id', function (req, res) {
     db.collection(CARDS_COLLECTION).find({_id:req.params.id}).toArray(
@@ -231,18 +395,21 @@ app.get('/update', function (req, res) {
             if (element.evolved)
                 db.collection("cards_ch").update({'_id':element._id}, 
                     {'$set':
-                        {'evolved.html': element.evolved.skill,
-                        'evolved.html_ch': element.evolved.skill_ch,
-                        'unevolved.html': element.unevolved.skill,
-                        'unevolved.html_ch': element.unevolved.skill_ch}
+                        {
+                            'evolved.html': element.evolved.skill,
+                            'evolved.html_ch': element.evolved.skill_ch,
+                            'unevolved.html': element.unevolved.skill,
+                            'unevolved.html_ch': element.unevolved.skill_ch
+                        }
                     }
                 );
             else
                 db.collection("cards_ch").update({'_id':element._id}, 
                     {'$set':
                         {
-                        'unevolved.html': element.unevolved.skill,
-                        'unevolved.html_ch': element.unevolved.skill_ch}
+                            'unevolved.html': element.unevolved.skill,
+                            'unevolved.html_ch': element.unevolved.skill_ch
+                        }
                     }
                 );
         });
@@ -953,7 +1120,8 @@ app.get('/open', function(req, res){
                     '大酋長好 敬禮!( ￣□￣)/  <(￣ㄧ￣ ) <(￣ㄧ￣ ) <(￣ㄧ￣ )',
                     '太...太非了吧 _(´ཀ`」 ∠)_',
                     '非洲暢遊包 (╥﹏╥)',
-                    '運氣很差 記得多積陰德 (σ′▽‵)′▽‵)σ'
+                    '運氣很差 記得多積陰德 (σ′▽‵)′▽‵)σ',
+                    'இдஇ'
                     ];
         str += comments[getRandomInt(0,comments.length)];
     }

@@ -5,12 +5,32 @@
 <h3>A demonstration of how to access a SELECT element</h3>
 
 <style>
+body{
+  background-color:black;
+  color:white;
+  font-family: Comic Sans MS,arial,helvetica,sans-serif, "微軟正黑體", "Microsoft JhengHei", "新細明體", "PMingLiU", "細明體", "MingLiU", "標楷體", "DFKai-sb", serif;
+}
+.item {
+  display: inline-block;
+  width: 200px;
+  margin: 1em;
+}
+.words{ 
+  font-size: 12px;
+  color: white;
+  top:10%;  
+  left: 20%;
+}
 .box2 {
   display: inline-block;
   width: 200px;
   height: 100px;
-  margin: 1em;
+  margin: 10em;
 }
+.display{
+  margin: 20px auto;
+}
+
 </style>
 
 
@@ -183,19 +203,23 @@
 
 </form>
 
-
+<div class = "display">
 <% if(cards.length == 0) {%>
 <div class="box2">
   沒有符合的卡片
 </div>
 <% }else {%>
   <% for(var i = 0; i < cards.length; ++i) {%>
-<div class="box2">
-  <%= cards[i].name_ch %>
-</div>
+  <% var a = cards[i].name_ch.split("/"); %>
+<div class="item">
+  
+  <a href="/card/<%= cards[i]._id %>"><img src="https://shadowverse-portal.com/image/card/ja/C_<%= cards[i]._id %>.png", width="100%"> </a>
+  <div><%= a[0] %></div>
 
+</div>
   <% }%>
 <% } %>
+</div>
 
 
 <script src="/js/jquery-3.1.1.min.js" type="text/javascript"></script>
