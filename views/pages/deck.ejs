@@ -237,6 +237,7 @@ $(document).ready(function() {
 
 function handleCookie(){
   var maxLen = 3;
+  console.log(Cookies.get("decks"));
   if(Cookies.get("decks")){
     var decks = JSON.parse(Cookies.get("decks"));
   }

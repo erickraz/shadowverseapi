@@ -73,7 +73,7 @@ app.get('/', function(req, res) {
 
 
  app.get('/test', function(req, res){
-    console.log(req.query);
+    //console.log(req.query);
     res.render('pages/test', {  
         title: '首頁',  
         users: ['Kai', 'aYen', 'Kyousuke'], 
@@ -124,7 +124,7 @@ app.use(cookieParser());
 
 app.post('/goo', function(req, res){
     var url = req.body.url;
-    console.log(req.body.url);
+    //console.log(req.body.url);
     var apiurl='https://www.googleapis.com/urlshortener/v1/url?key='+clientId_goo;
     var option = {
         url: apiurl,
@@ -134,7 +134,7 @@ app.post('/goo', function(req, res){
         }
     };
     function cb(error, response, body) {
-        console.log(body);
+        //console.log(body);
         
         res.send(body);
     }
@@ -144,7 +144,7 @@ app.post('/goo', function(req, res){
 
 app.post('/imgur', function(req, res){
     var imageurl = req.body.imageurl;
-    console.log(req.body.imageurl);
+    //console.log(req.body.imageurl);
     var option = {
         url: 'https://api.imgur.com/3/upload',
         headers: {
@@ -164,7 +164,7 @@ app.post('/imgur', function(req, res){
 });
 
 app.get('/deck', function(req1, res1){
-    console.log(req1.query);
+    //console.log(req1.query);
 
     var lang, deck_code = req1.query.deck_code;
     if(req1.query.lang && langList.indexOf(req1.query.lang) > -1){
@@ -204,7 +204,7 @@ app.get('/deck', function(req1, res1){
             });
             res.on('end', () => {
                 var obj = JSON.parse(output);
-                console.log(obj);
+                //console.log(obj);
                 renderPage(obj);
                 //res1.send(obj);
                 /*var imageurl = 'https://shadowverse-portal.com/image/'+obj.data.hash
