@@ -237,7 +237,9 @@ $(document).ready(function() {
 
 function handleCookie(){
   var maxLen = 3;
-  var decks = JSON.parse(Cookies.get("decks"));
+  if(Cookies.get("decks")){
+    var decks = JSON.parse(Cookies.get("decks"));
+  }
 <% if(locals.hash){ %>
   var currentHash = "<%=hash%>";
   var item = { 
