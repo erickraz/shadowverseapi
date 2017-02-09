@@ -170,7 +170,7 @@ input:checked + .slider:before {
 <% var currentHash = hash%>
   <div class = "box1">
     <img id ="img0" src="https://shadowverse-portal.com/image/<%= hash %>?lang=en">
-    <img id ="img1" src="https://shadowverse-portal.com/image/<%= hash %>?lang=jp" style="display: none;">
+    <img id ="img1" src="https://shadowverse-portal.com/image/<%= hash %>?lang=ja" style="display: none;">
 
   </div>
 
@@ -235,6 +235,7 @@ $(document).ready(function() {
 
 });
 
+
 function handleCookie(){
   var maxLen = 3;
   console.log(Cookies.get("decks"));
@@ -245,7 +246,7 @@ function handleCookie(){
   var currentHash = "<%=hash%>";
   var item = { 
     hash: currentHash,
-    time: (new Date()).toISOString().slice(0,10)
+    time: (new Date()).toLocaleString()
   };
   if(decks && decks.history && decks.history.length){
     var array = decks.history;
