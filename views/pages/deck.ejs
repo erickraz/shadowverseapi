@@ -255,13 +255,13 @@ function handleCookie(){
       if(array[i].hash == currentHash)
         index = i;
     }
-    if(index > 0){
-      array.splice(index, 1);//
+    if(index == -1){
+      array.unshift(item);//
     }
     else if(array.length == maxLen){
       array.splice(maxLen-1,1);
+      array.unshift(item);
     }
-    array.unshift(item);
     decks.history = array;
     Cookies.set('decks', JSON.stringify(decks), 30);
   }
