@@ -315,10 +315,10 @@ function upload(){
   if(document.getElementById("span_imgur").style.display!='inline'){
     var currentImg = document.getElementById('lang_checkbox').checked ? "img1" : "img0";
     var uploadurl = document.getElementById(currentImg).src;
-    console.log(uploadurl);
+    //console.log(uploadurl);
     $.post('/imgur', { imageurl: uploadurl}, 
       function(returnedData){
-        console.log(returnedData);
+        //console.log(returnedData);
         if(returnedData.success){
           document.getElementById("link_imgur").value = returnedData.data.link;
           $("#span_imgur").fadeIn("slow");
@@ -337,10 +337,10 @@ function upload(){
 function shorten(){
   if(document.getElementById("span_goo").style.display!='inline'){
     var longurl = document.getElementById('link').value;
-    console.log(longurl);
+    //console.log(longurl);
     $.post('/goo', { url: longurl}, 
       function(returnedData){
-        console.log(returnedData);
+        //console.log(returnedData);
         if(returnedData.id){
           document.getElementById("link_goo").value = returnedData.id;
           $("#span_goo").fadeIn("slow");
