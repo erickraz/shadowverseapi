@@ -48,6 +48,7 @@ input.link-imgur{
   cursor: pointer;
 }
 .box1 {
+  text-align:center;
   display: block;
   width: 800px;
   height: auto;
@@ -60,6 +61,12 @@ input.link-imgur{
   height: 400px;
   margin: 0px auto;
 }
+.box3 {
+  overflow: auto;
+  display: block;
+  margin: 0px auto;
+}
+
 .display{
   margin: 20px auto;
 }
@@ -153,20 +160,25 @@ input:checked + .slider:before {
   margin-top: -8px;
 } 
 
+.left {
+  float: left;
+  margin: 0px 25px;
+}
+
+
 </style>
 
 <div class = "box1">
 <form action="/deck" id="req_form">
   <input type="text" name="deck_code" placeholder="deck code"><br>
   <input type="submit" value="Submit">
-  <input type="hidden" name="history">
 </form>
 </div>
 
   
 
 
-<% if(locals.hash || locals.history){ %>
+<% if(locals.hash){ %>
 <% var currentHash = hash%>
   <div class = "box1">
     <img id ="img0" src="https://shadowverse-portal.com/image/<%= hash %>?lang=en">
@@ -176,12 +188,15 @@ input:checked + .slider:before {
 
   <div class = "box2">
   <div>
-  shadowverse portal <a href="https://shadowverse-portal.com/deck/<%= hash %>">連結</a>
+  shadowverse portal <a href="https://shadowverse-portal.com/deck/<%= hash %>">連結: </a>
   </div>
+
   <div>
   <input type="text" id="link" class="link" name = "link" value="https://shadowverse-portal.com/deck/<%= hash %>" readonly> 
   <a id="copylink" class="button-copy" onclick="copyToClipboard(link);">複製</a>
   </div>
+
+
   <div>
   <a id="imgurupl" class = "button-imgur" onclick="upload();"><b>Upload to Imgur</b></a>
   <span id ="span_imgur" class="arrow_box">
@@ -199,7 +214,7 @@ input:checked + .slider:before {
 
   <div>
   <label class="switch">
-  <input id= "lang_checkbox" type="checkbox" onclick='handleClick(this);'>
+  <input id= "lang_checkbox" type="checkbox" onclick='switchImgLang(this);'>
   <div class="slider round"></div>
   </label>
   </div>
@@ -209,7 +224,7 @@ input:checked + .slider:before {
   <input type="button" value="清除紀錄" onclick="clearHistory();">
 </div>
 
-<div>
+<div class = "box1">
 中文 
 <input type="radio" name="lang" value="zh" id="zh" onclick="submit()" form="req_form" checked>
 英文
@@ -224,9 +239,6 @@ $(document).ready(function() {
 <% if(locals.deck_code) {%>
   var myControls = myForm.elements['deck_code'];
   myControls.value="<%= deck_code%>";
-<% } %>
-<% if(locals.history) {%>
-  myForm.elements['history'].value="<%= history%>";
 <% } %>
   var langControl = document.getElementById('<%= lang %>');
   langControl.checked = true;
@@ -282,12 +294,23 @@ function handleCookie(){
       var img = document.createElement('input');
       img.setAttribute('src',"/images/classes/class"+hash[2]+".png");
       img.setAttribute('type',"image");
-      img.setAttribute('onclick', 'doit('+i+')');
-      var a = document.createElement('a');
-      a.innerHTML = '建立日期: ' + decks.history[i].time;
+      img.setAttribute('onclick', 'jumpTo('+i+')');
+      img.setAttribute('class', 'left');
+
+      var time = document.createElement('p');
+      time.innerHTML = '建立日期: ' + decks.history[i].time;
+      time.setAttribute('class', 'left');
+
+      var input = document.createElement('input');
+      input.setAttribute('type', 'text');
+      input.setAttribute('placeholder', '敘述');
+      input.setAttribute('class', 'left');
+
       var div = document.createElement('div');
+      div.setAttribute('class', 'box3');
       div.appendChild(img);
-      div.appendChild(a);
+      div.appendChild(time);
+      div.appendChild(input);
       divHistory.appendChild(div);
     }
   }
@@ -296,11 +319,12 @@ function clearHistory(){
   Cookies.set('decks', JSON.stringify({}), 30);
   window.location.href = '/deck?lang=<%=lang%>';
 }
-function doit(idx){
+//jump to ith history
+function jumpTo(idx){
   window.location.href = '/deck?lang=<%=lang%>&history='+idx;
 }
 
-function handleClick(cb) {
+function switchImgLang(cb) {
   if(cb.checked){
     document.getElementById("img0").style.display='none';
     document.getElementById("img1").style.display='block';    
