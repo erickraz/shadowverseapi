@@ -6,6 +6,8 @@
 
 <style>
 body{
+  background-color: black;
+  color: white;
   font-size: 16px;
 }
 input.link{
@@ -14,6 +16,9 @@ input.link{
 }
 input.link-imgur{
   font-size: 16px;
+}
+a.splink{
+  color: lightblue;
 }
 
 .button-imgur{
@@ -47,6 +52,7 @@ input.link-imgur{
   margin: 4px 2px;
   cursor: pointer;
 }
+
 .box1 {
   text-align:center;
   display: block;
@@ -55,16 +61,23 @@ input.link-imgur{
   margin: 0px auto;
 }
 .box2 {
-  background-color : #EEE;
+  /* background-color : #EEE; */
+  background-color : #232323;
   display: block;
   width: 800px;
-  height: 400px;
+  height: auto;
   margin: 0px auto;
+  border-radius: 4px;
 }
 .box3 {
   overflow: auto;
   display: block;
   margin: 0px auto;
+  border-radius: 4px;
+}
+
+.selected {
+  border-color: lightblue;
 }
 
 .display{
@@ -160,35 +173,61 @@ input:checked + .slider:before {
   margin-top: -8px;
 } 
 
-.left {
-  float: left;
-  margin: 0px 25px;
+.outer{
+  height: 60;
+  width: auto;
+  position: relative;
+}
+.loader {
+  position: absolute;
+  top: calc(50% - 24px);
+  display: none;
+  border: 5px solid #f3f3f3; /* Light grey */
+  border-top: 5px solid #3498db; /* Blue */
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  animation: spin 2s linear infinite;
 }
 
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
 
+.left {
+  float: left;
+}
+.right{
+  margin: 0px 25px;
+  float: left;
+}
 </style>
+
 
 <div class = "box1">
 <form action="/deck" id="req_form">
-  <input type="text" name="deck_code" placeholder="deck code"><br>
+  <input type="text" name="deck_code" placeholder="deck code">
   <input type="submit" value="Submit">
 </form>
 </div>
 
-  
 
 
 <% if(locals.hash){ %>
 <% var currentHash = hash%>
+
+  
+
+  <div class = "box2">
   <div class = "box1">
     <img id ="img0" src="https://shadowverse-portal.com/image/<%= hash %>?lang=en">
     <img id ="img1" src="https://shadowverse-portal.com/image/<%= hash %>?lang=ja" style="display: none;">
 
   </div>
 
-  <div class = "box2">
   <div>
-  shadowverse portal <a href="https://shadowverse-portal.com/deck/<%= hash %>">連結: </a>
+  shadowverse portal <a class="splink" href="https://shadowverse-portal.com/deck/<%= hash %>">連結: </a>
   </div>
 
   <div>
@@ -196,16 +235,18 @@ input:checked + .slider:before {
   <a id="copylink" class="button-copy" onclick="copyToClipboard(link);">複製</a>
   </div>
 
-
-  <div>
+  <div class="outer">
   <a id="imgurupl" class = "button-imgur" onclick="upload();"><b>Upload to Imgur</b></a>
+  <span id ="loader_imgur" class="loader"></span>
   <span id ="span_imgur" class="arrow_box">
     <input type="text" id="link_imgur" class="link-imgur" name = "link-imgur" readonly> 
     <a id="copyimgur" class="button-copy" onclick="copyToClipboard(link_imgur);">複製</a>
   </span>
   </div>
-  <div>
+
+  <div class="outer">
   <a id="gooupl" class = "button-imgur" onclick="shorten();"><b>shorthen using goo.gl</b></a>
+  <span id ="loader_goo" class="loader"></span>
   <span id ="span_goo" class="arrow_box">
     <input type="text" id="link_goo" class="link-imgur" name = "link-goo" readonly> 
     <a id="copygoo" class="button-copy" onclick="copyToClipboard(link_goo);">複製</a>
@@ -223,6 +264,7 @@ input:checked + .slider:before {
 <div id="history" class = "box1">
   <input type="button" value="清除紀錄" onclick="clearHistory();">
 </div>
+
 
 <div class = "box1">
 中文 
@@ -254,41 +296,41 @@ function handleCookie(){
   if(Cookies.get("decks")){
     var decks = JSON.parse(Cookies.get("decks"));
   }
-<% if(locals.hash){ %>
-  var currentHash = "<%=hash%>";
-  var item = { 
-    hash: currentHash,
-    time: (new Date()).toLocaleString()
-  };
-  if(decks && decks.history && decks.history.length){
-    var array = decks.history;
-    var index = -1; //array.indexOf(currentHash);
-    for(var i = 0; i < array.length; ++i){
-      if(array[i].hash == currentHash)
-        index = i;
-    }
-    if(index == -1){
-      array.unshift(item);//
-    }
-    else if(array.length == maxLen){
-      array.splice(maxLen-1,1);
-      array.unshift(item);
-    }
-    decks.history = array;
-    Cookies.set('decks', JSON.stringify(decks), 30);
-  }
-  else{
-    decks = {
-      history: [item]
-    };
-    Cookies.set('decks', JSON.stringify(decks), 30);
-  }
+// <% if(locals.hash){ %>
+//   var currentHash = "<%=hash%>";
+//   var item = { 
+//     hash: currentHash,
+//     time: (new Date()).toLocaleString()
+//   };
+//   if(decks && decks.history && decks.history.length){
+//     var array = decks.history;
+//     var index = -1; //array.indexOf(currentHash);
+//     for(var i = 0; i < array.length; ++i){
+//       if(array[i].hash == currentHash)
+//         index = i;
+//     }
+//     if(index == -1){
+//       array.unshift(item);//
+//     }
+//     else if(array.length == maxLen){
+//       array.splice(maxLen-1,1);
+//       array.unshift(item);
+//     }
+//     decks.history = array;
+//     Cookies.set('decks', JSON.stringify(decks), 30);
+//   }
+//   else{
+//     decks = {
+//       history: [item]
+//     };
+//     Cookies.set('decks', JSON.stringify(decks), 30);
+//   }
 
-<% } %>
+// <% } %>
   console.log(decks);
-  if(decks && decks.history && decks.history.length){
-    for(var i = 0; i < decks.history.length; ++i){
-      var hash = decks.history[i].hash;
+  if(decks && decks.length){
+    for(var i = 0; i < decks.length; ++i){
+      var hash = decks[i].hash;
       var divHistory = document.getElementById('history');
 
       var img = document.createElement('input');
@@ -298,13 +340,14 @@ function handleCookie(){
       img.setAttribute('class', 'left');
 
       var time = document.createElement('p');
-      time.innerHTML = '建立日期: ' + decks.history[i].time;
-      time.setAttribute('class', 'left');
+      var date = new Date(decks[i].time);
+      time.innerHTML = '建立日期: ' + date.toLocaleString();
+      time.setAttribute('class', 'right');
 
       var input = document.createElement('input');
       input.setAttribute('type', 'text');
       input.setAttribute('placeholder', '敘述');
-      input.setAttribute('class', 'left');
+      input.setAttribute('class', 'right');
 
       var div = document.createElement('div');
       div.setAttribute('class', 'box3');
@@ -339,20 +382,23 @@ function upload(){
   if(document.getElementById("span_imgur").style.display!='inline'){
     var currentImg = document.getElementById('lang_checkbox').checked ? "img1" : "img0";
     var uploadurl = document.getElementById(currentImg).src;
-    //console.log(uploadurl);
+    document.getElementById("loader_imgur").style.display='inline-block';
     $.post('/imgur', { imageurl: uploadurl}, 
       function(returnedData){
         //console.log(returnedData);
         if(returnedData.success){
           document.getElementById("link_imgur").value = returnedData.data.link;
+          document.getElementById("loader_imgur").style.display='none';
           $("#span_imgur").fadeIn("slow");
         }
         else{
           document.getElementById("link_imgur").value  = "發生未知的錯誤";
+          document.getElementById("loader_imgur").style.display='none';
           $("#span_imgur").fadeIn("slow");
         }
     }).fail(function(){
         document.getElementById("link_imgur").value  = "發生未知的錯誤";
+        document.getElementById("loader_imgur").style.display='none';
         $("#span_imgur").fadeIn("slow");
     });
   }
@@ -361,20 +407,23 @@ function upload(){
 function shorten(){
   if(document.getElementById("span_goo").style.display!='inline'){
     var longurl = document.getElementById('link').value;
-    //console.log(longurl);
+    document.getElementById("loader_goo").style.display='inline-block';
     $.post('/goo', { url: longurl}, 
       function(returnedData){
         //console.log(returnedData);
         if(returnedData.id){
           document.getElementById("link_goo").value = returnedData.id;
+          document.getElementById("loader_goo").style.display='none';
           $("#span_goo").fadeIn("slow");
         }
         else{
           document.getElementById("link_goo").value  = "發生未知的錯誤";
+          document.getElementById("loader_goo").style.display='none';
           $("#span_goo").fadeIn("slow");
         }
     }).fail(function(){
         document.getElementById("link_goo").value  = "發生未知的錯誤";
+        document.getElementById("loader_goo").style.display='none';
         $("#span_goo").fadeIn("slow");
     });
   }

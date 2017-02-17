@@ -163,8 +163,8 @@ app.post('/imgur', function(req, res){
     
 });
 
+var maxLen = 5;
 app.get('/deck', function(req1, res1){
-    //console.log(req1.query);
 
     var lang, deck_code = req1.query.deck_code;
     if(req1.query.lang && langList.indexOf(req1.query.lang) > -1){
@@ -204,31 +204,7 @@ app.get('/deck', function(req1, res1){
             });
             res.on('end', () => {
                 var obj = JSON.parse(output);
-                //console.log(obj);
                 renderPage(obj);
-                //res1.send(obj);
-                /*var imageurl = 'https://shadowverse-portal.com/image/'+obj.data.hash
-                    +'?lang='+lang;
-                var option = {
-                    url: 'https://api.imgur.com/3/upload',
-                    headers: {
-                        Authorization: "Client-ID "+clientId
-                    },
-                    method: "POST",
-                    form: {
-                        image: imageurl
-                    }
-                };
-                function cb(error, response, body) {
-                    if (!error && response.statusCode == 200) {
-                        var info = JSON.parse(body);
-                        console.log(info);
-                    }
-                    else{
-                        console.log("error uploading image");
-                    }
-                }
-                request(option, cb);*/
             });
         });
         req.on('error', (e) => {
@@ -251,26 +227,51 @@ app.get('/deck', function(req1, res1){
         };
         if ('data' in obj && 'hash' in obj.data){
             params['hash'] = obj.data.hash;
+            //arrange cookie
+            var cookie = JSON.parse(req1.cookies.decks);
+            var currentHash = obj.data.hash;
+            var item = { 
+                hash: currentHash,
+                time: (new Date()).toUTCString()
+            };
+            if(cookie && cookie.length){
+                var array = cookie;
+                var index = -1; //array.indexOf(currentHash);
+                for(var i = 0; i < array.length; ++i){
+                    if(array[i].hash == currentHash)
+                        index = i;
+                }
+                if(index == -1){
+                    array.unshift(item);//
+                }
+                else if(array.length == maxLen){
+                    array.splice(maxLen-1,1);
+                    array.unshift(item);
+                }
+                cookie = array;
+                res1.cookie('decks', JSON.stringify(cookie), { maxAge: 86400000*30});
+            }
+            else{
+                cookie = [item];
+                res1.cookie('decks', JSON.stringify(cookie), { maxAge: 86400000*30});
+            }
         }
         if(deck_code){
             params['deck_code']=deck_code;
         }
         else if(req1.query.history){
-            //rearrage cookie and redirect to 0 if history is not zero
             var idx = req1.query.history;
             var cookie = JSON.parse(req1.cookies.decks);
-            if(cookie && cookie.history && cookie.history.length != 0){
-                if(idx != 0){
-                    var item = cookie.history[idx];
-                    cookie.history.splice(idx, 1);
-                    cookie.history.unshift(item);
-                    res1.cookie('decks', JSON.stringify(cookie), { maxAge: 86400000*30});
+            if(cookie && cookie.length){
+                if(idx >= cookie.length){
                     res1.redirect('deck?history=0&lang='+lang);
                     return;
                 }
-                params['hash']=cookie.history[0].hash;
+                params['hash']=cookie[idx].hash;
             }
+            params['history']=req1.query.history;
         }
+        console.log(params);
         res1.render('pages/deck', params);
     }
 });
@@ -900,10 +901,12 @@ app.get('/gamble', function (req, res) {
             var roll = getRandomInt(1,101);
             str += " 骰出 " + roll + "，";
 
-            if(roll <= 60){
+            if(roll == 1){
+                str += "原來你是地選之人 StoneLightning 算了還你麵包";
+                bonus = 0;
+            }
+            else if(roll <= 60){
                 str += num + "個麵包掉到地上了 (;´༎ຶД༎ຶ`)";
-                if(roll == 1)
-                    str += "。原來你是地選之人 StoneLightning ";
                 bonus = -1*num;
             }
             else if(roll <= 98){
