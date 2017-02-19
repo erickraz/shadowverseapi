@@ -165,7 +165,6 @@ app.post('/imgur', function(req, res){
 
 var maxLen = 5;
 app.get('/deck', function(req1, res1){
-
     var lang, deck_code = req1.query.deck_code;
     if(req1.query.lang && langList.indexOf(req1.query.lang) > -1){
         lang = req1.query.lang;
@@ -185,7 +184,6 @@ app.get('/deck', function(req1, res1){
         res1.redirect(link+'&lang='+lang);
         return;
     }
-
 
     if(deck_code){
         var code_path = '/api/v1/deck/import/?format=json&lang='+lang
@@ -208,7 +206,10 @@ app.get('/deck', function(req1, res1){
             });
         });
         req.on('error', (e) => {
+               
             console.log('problem with request: ' + e.message);
+            var obj = {};
+            renderPage(obj); 
         });
 
         
@@ -225,6 +226,9 @@ app.get('/deck', function(req1, res1){
             title: 'deck',
             lang: lang
         };
+        if(deck_code){
+            params['deck_code']=deck_code;
+        }
         if ('data' in obj && 'hash' in obj.data){
             params['hash'] = obj.data.hash;
             //arrange cookie
@@ -255,9 +259,8 @@ app.get('/deck', function(req1, res1){
                 cookie = [item];
                 res1.cookie('decks', JSON.stringify(cookie), { maxAge: 86400000*30});
             }
-        }
-        if(deck_code){
-            params['deck_code']=deck_code;
+            res1.render('pages/deck', params);
+            return;
         }
         else if(req1.query.history){
             var idx = req1.query.history;
@@ -267,12 +270,36 @@ app.get('/deck', function(req1, res1){
                     res1.redirect('deck?history=0&lang='+lang);
                     return;
                 }
-                params['hash']=cookie[idx].hash;
+                else{
+                    params['hash']=cookie[idx].hash;
+                    params['history']=req1.query.history;
+                    //post req to get deck code
+                    getCode(cookie[idx].hash, params);
+                }
             }
-            params['history']=req1.query.history;
         }
-        console.log(params);
-        res1.render('pages/deck', params);
+        else{
+            res1.render('pages/deck', params);
+        }
+
+    }
+    function getCode(hash, params){
+        var option = {
+            url: 'https://shadowverse-portal.com/api/v1/deck_code/publish/?format=json&lang=en',
+            method: "POST",
+            form: {
+                hash: hash,
+                csrf_token: "105b061206e2e9b10394847587b45765da385523d7f15e1625ad280e62866fdb"
+            }
+        };
+        request(option, cb);
+        function cb(error, response, body) {
+            var info = JSON.parse(body);
+            if ('data' in info && 'deck_code' in info.data){
+                params['deck_code'] = info.data.deck_code;
+                res1.render('pages/deck', params);
+            }
+        }
     }
 });
 
