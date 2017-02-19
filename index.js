@@ -1161,27 +1161,54 @@ app.get('/open', function(req, res){
 })
 
 var whitelist = [];
+app.get('/protect', function(req, res){ 
+    var sender = req.query.sender, var arg = req.query.sender;
+    if(arg == "解除"){
+        if(whitelist.indexOf(sender) == -1){
+            whitelist.push(sender);
+        }
+        res.send(sender+" 已經解除保護");
+    }
+    else if(arg == "啟動"){
+        if(whitelist.indexOf(sender) != -1){
+            whitelist.splice(whitelist.indexOf(sender),1);
+        }
+        res.send(sender+" 已經啟動保護");
+    }
+    else{
+        var str = "輸入 !保護 啟動  // !保護 解除 來保護/出賣自己。 現在可以決鬥的名單有: ";
+        for(var i = 0; i < whitelist.length; ++i)
+            str += whitelist[i]+ " ";
+        res.send(str);
+    }
+}
 app.get('/duel', function(req, res){ 
     var sender = req.query.sender, receiver = req.query.receiver;
     //split and check input
     if (sender == "null"){
-        res.send("輸入對手名字來決鬥 骰到大於50你獲勝 輸的人被ban 60秒 雙方都要解除保護 例: !決鬥 acs142");
+        res.send("輸入對手名字來決鬥 骰到攻擊力大於50你獲勝 輸的人被ban 60秒 雙方都要解除保護 例: !決鬥吧 acs142");
         return;
     }
     else if (receiver == "null" || receiver == sender){
-        res.send("輸入對手名字來決鬥 骰到大於50你獲勝 輸的人被ban 60秒 雙方都要解除保護 例: !決鬥 acs142");
+        res.send("輸入對手名字來決鬥 骰到攻擊力大於50你獲勝 輸的人被ban 60秒 雙方都要解除保護 例: !決鬥 acs142");
         return;
     }
     else{
+        if(whitelist.indexOf(sender) == -1){
+            res.send(sender+" 要先解除保護才能攻擊 !保護 解除");
+        }
+        if(whitelist.indexOf(receiver) == -1){
+            res.send(receiver+" 要先解除保護才能被攻擊 !保護 解除");
+        }
         var str = sender;
         var roll = getRandomInt(1,101);
-        str += " 骰出 " + roll + "，";
+        str += " 攻擊力為 " + roll + "，";
         if(roll <= 50){
-            str += sender + "輸了，被ban 60秒";
+            str += sender + "攻擊失敗，受傷休息 60秒";
 
         }
         else
-            str += receiver + "輸了，被ban 60秒";
+            str += receiver + "被擊倒，受傷休息 60秒";
         res.send(str);
     }
 
