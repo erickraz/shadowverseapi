@@ -1159,3 +1159,30 @@ app.get('/open', function(req, res){
     
     res.send(str);
 })
+
+var whitelist = [];
+app.get('/duel', function(req, res){ 
+    var sender = req.query.sender, receiver = req.query.receiver;
+    //split and check input
+    if (sender == "null"){
+        res.send("輸入對手名字來決鬥 骰到大於50你獲勝 輸的人被ban 60秒 雙方都要解除保護 例: !決鬥 acs142");
+        return;
+    }
+    else if (receiver == "null" || receiver == sender){
+        res.send("輸入對手名字來決鬥 骰到大於50你獲勝 輸的人被ban 60秒 雙方都要解除保護 例: !決鬥 acs142");
+        return;
+    }
+    else{
+        var str = sender;
+        var roll = getRandomInt(1,101);
+        str += " 骰出 " + roll + "，";
+        if(roll <= 50){
+            str += sender + "輸了，被ban 60秒";
+
+        }
+        else
+            str += receiver + "輸了，被ban 60秒";
+        res.send(str);
+    }
+
+})
