@@ -202,6 +202,10 @@ input:checked + .slider:before {
   margin: 0px 25px;
   float: left;
 }
+.delete{
+  float: right;
+  color: #cc0000;
+}
 </style>
 
 
@@ -291,7 +295,7 @@ $(document).ready(function() {
 
 
 function handleCookie(){
-  var maxLen = 3;
+  var maxLen = 3, decks;
   console.log(Cookies.get("decks"));
   if(Cookies.get("decks")){
     var decks = JSON.parse(Cookies.get("decks"));
@@ -346,14 +350,35 @@ function handleCookie(){
 
       var input = document.createElement('input');
       input.setAttribute('type', 'text');
+      input.setAttribute('id', 'desc'+i);
       input.setAttribute('placeholder', '敘述');
-      input.setAttribute('class', 'right');
+      input.setAttribute('onkeypress', 'enterPress(event,'+i+')');
+      //input.setAttribute('class', 'right');
+      if(decks[i].desc){
+        input.setAttribute('value', decks[i].desc);
+      }
+
+      var input_button = document.createElement('input');
+      input_button.setAttribute('type', 'button');
+      input_button.setAttribute('onclick', 'updateDesc('+i+')');
+      input_button.setAttribute('value', '更新敘述')
+
+
+      var delete_desc = document.createElement('a');
+      delete_desc.innerHTML = '刪除';
+      delete_desc.setAttribute('href', '');
+      delete_desc.setAttribute('class', 'delete');
+      delete_desc.setAttribute('onclick', 'deleteDiv('+i+');return false;');
+
 
       var div = document.createElement('div');
+      div.setAttribute('id', 'history_div'+i);
       div.setAttribute('class', 'box3');
       div.appendChild(img);
       div.appendChild(time);
       div.appendChild(input);
+      div.appendChild(input_button);
+      div.appendChild(delete_desc);
       divHistory.appendChild(div);
     }
   }
@@ -365,6 +390,30 @@ function clearHistory(){
 //jump to ith history
 function jumpTo(idx){
   window.location.href = '/deck?lang=<%=lang%>&history='+idx;
+}
+
+function deleteDiv(idx){
+  if(Cookies.get("decks")){
+    var decks = JSON.parse(Cookies.get("decks"));
+    decks.splice(idx,1);
+    Cookies.set('decks', JSON.stringify(decks), {expires: 30});
+  }
+  $("#history_div"+idx).fadeOut("slow");
+}
+
+function enterPress(e, idx){
+  if(e.keyCode == 13){
+    updateDesc(idx);
+  }
+}
+
+function updateDesc(idx){
+  var desc = document.getElementById('desc'+idx).value;
+  if(Cookies.get("decks")){
+    var decks = JSON.parse(Cookies.get("decks"));
+    decks[idx]['desc']=desc;
+    Cookies.set('decks', JSON.stringify(decks), {expires: 30});
+  }
 }
 
 function switchImgLang(cb) {
