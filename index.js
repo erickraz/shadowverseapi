@@ -1162,7 +1162,7 @@ app.get('/open', function(req, res){
 
 var whitelist = [];
 app.get('/protect', function(req, res){ 
-    var sender = req.query.sender, var arg = req.query.sender;
+    var sender = req.query.sender, arg = req.query.sender;
     if(arg == "解除"){
         if(whitelist.indexOf(sender) == -1){
             whitelist.push(sender);
