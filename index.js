@@ -1181,7 +1181,7 @@ app.get('/protect', function(req, res){
             str += whitelist[i]+ " ";
         res.send(str);
     }
-}
+})
 app.get('/duel', function(req, res){ 
     var sender = req.query.sender, receiver = req.query.receiver;
     //split and check input
