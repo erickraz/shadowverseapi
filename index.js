@@ -1167,13 +1167,13 @@ app.get('/protect', function(req, res){
         if(whitelist.indexOf(sender) == -1){
             whitelist.push(sender);
         }
-        res.send(sender+" 已經解除保護");
+        res.send(sender+" 已經解除保護 要重新獲得保護輸入 !保護 啟動");
     }
     else if(arg == "啟動"){
         if(whitelist.indexOf(sender) != -1){
             whitelist.splice(whitelist.indexOf(sender),1);
         }
-        res.send(sender+" 已經啟動保護");
+        res.send(sender+" 已經啟動保護 要重新解除保護輸入 !保護 啟動");
     }
     else{
         var str = "輸入 !保護 啟動  // !保護 解除 來保護/出賣自己。 現在可以決鬥的名單有: ";
@@ -1182,8 +1182,40 @@ app.get('/protect', function(req, res){
         res.send(str);
     }
 })
+
+
+var setting = {
+    HOST: "irc.chat.twitch.tv",
+    PORT: 6667,
+    PASS: "oauth:oh5n3n464jin2w33l13g7plranccu9",
+    NICK: "ss87bot",
+    CHANNEL: "#shanasaikou"
+}
+var client;
+var net = require('net');
+app.get('/bot', function(req,res){
+    client = new net.Socket();
+    client.connect(6667, 'irc.chat.twitch.tv', function() {
+        console.log('Connected');
+        client.write('PASS '+setting.PASS+'\r\n');
+        client.write('NICK '+setting.NICK+'\r\n');
+        client.write('JOIN '+setting.CHANNEL+'\r\n');        
+    });
+
+    client.on('data', function(data) {
+        console.log('Received: ' + data);
+        //client.destroy(); // kill client after server's response
+    });
+
+    client.on('close', function() {
+        console.log('Connection closed');
+    });
+    res.send('ok');
+})
+
+
 app.get('/duel', function(req, res){ 
-    var sender = req.query.sender, receiver = req.query.receiver;
+    var sender = req.query.sender, receiver = req.query.receiver.toLowerCase();
     //split and check input
     if (sender == "null"){
         res.send("輸入對手名字來決鬥 骰到攻擊力大於50你獲勝 輸的人被ban 60秒 雙方都要解除保護 例: !決鬥吧 acs142");
@@ -1205,10 +1237,13 @@ app.get('/duel', function(req, res){
         str += " 攻擊力為 " + roll + "，";
         if(roll <= 50){
             str += sender + "攻擊失敗，受傷休息 60秒";
+            client.write('PRIVMSG '+setting.CHANNEL+' :' + 'ban'+ sender + '\r\n')
 
         }
-        else
+        else{
             str += receiver + "被擊倒，受傷休息 60秒";
+            client.write('PRIVMSG '+setting.CHANNEL+' :' + 'ban'+ receiver + '\r\n')
+        }
         res.send(str);
     }
 
