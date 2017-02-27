@@ -1173,7 +1173,7 @@ app.get('/protect', function(req, res){
         if(whitelist.indexOf(sender) != -1){
             whitelist.splice(whitelist.indexOf(sender),1);
         }
-        res.send(sender+" 已經啟動保護 要重新解除保護輸入 !保護 啟動");
+        res.send(sender+" 已經啟動保護 要重新解除保護輸入 !保護 解除");
     }
     else{
         var str = "輸入 !保護 啟動  // !保護 解除 來保護/出賣自己。 現在可以決鬥的名單有: ";
@@ -1204,6 +1204,9 @@ app.get('/bot', function(req,res){
 
     client.on('data', function(data) {
         console.log('Received: ' + data);
+        if(data == 'PING :tmi.twitch.tv'){
+            client.write('PONG :tmi.twitch.tv'++'\r\n');
+        }
         //client.destroy(); // kill client after server's response
     });
 
@@ -1212,6 +1215,11 @@ app.get('/bot', function(req,res){
     });
     res.send('ok');
 })
+
+app.get('/part', function(req,res){
+    client.write('PART '+setting.CHANNEL+'\r\n');
+    client.destroy();
+}
 
 
 app.get('/duel', function(req, res){ 
@@ -1228,21 +1236,27 @@ app.get('/duel', function(req, res){
     else{
         if(whitelist.indexOf(sender) == -1){
             res.send(sender+" 要先解除保護才能攻擊 !保護 解除");
+            return;
         }
         if(whitelist.indexOf(receiver) == -1){
             res.send(receiver+" 要先解除保護才能被攻擊 !保護 解除");
+            return;
+        }
+        if(sender == 'acs142' || receiver == 'acs142'){
+            res.send(sender+" mod不能被攻擊 BibleThump");
+            return;
         }
         var str = sender;
         var roll = getRandomInt(1,101);
         str += " 攻擊力為 " + roll + "，";
         if(roll <= 50){
             str += sender + "攻擊失敗，受傷休息 60秒";
-            client.write('PRIVMSG '+setting.CHANNEL+' :' + 'ban'+ sender + '\r\n')
+            client.write('PRIVMSG '+setting.CHANNEL+' :' + '/timeout '+ sender + ' 60 \r\n')
 
         }
         else{
             str += receiver + "被擊倒，受傷休息 60秒";
-            client.write('PRIVMSG '+setting.CHANNEL+' :' + 'ban'+ receiver + '\r\n')
+            client.write('PRIVMSG '+setting.CHANNEL+' :' + '/timeout '+ receiver + ' 60 \r\n')
         }
         res.send(str);
     }
