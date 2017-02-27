@@ -1199,13 +1199,14 @@ app.get('/bot', function(req,res){
         console.log('Connected');
         client.write('PASS '+setting.PASS+'\r\n');
         client.write('NICK '+setting.NICK+'\r\n');
-        client.write('JOIN '+setting.CHANNEL+'\r\n');        
+        client.write('JOIN '+setting.CHANNEL+'\r\n');    
+        client.write('PRIVMSG '+setting.CHANNEL+' :' + '大家安安 \r\n')
     });
 
     client.on('data', function(data) {
         console.log('Received: ' + data);
         if(data == 'PING :tmi.twitch.tv'){
-            client.write('PONG :tmi.twitch.tv'++'\r\n');
+            client.write('PONG :tmi.twitch.tv'+'\r\n');
         }
         //client.destroy(); // kill client after server's response
     });
@@ -1217,9 +1218,11 @@ app.get('/bot', function(req,res){
 })
 
 app.get('/part', function(req,res){
+    client.write('PRIVMSG '+setting.CHANNEL+' :' + '大家88 \r\n')
     client.write('PART '+setting.CHANNEL+'\r\n');
     client.destroy();
-}
+    res.send('ok');
+})
 
 
 app.get('/duel', function(req, res){ 
