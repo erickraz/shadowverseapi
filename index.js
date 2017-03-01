@@ -1192,6 +1192,7 @@ var setting = {
     CHANNEL: "#shanasaikou"
 }
 var client;
+var connected = false;
 var net = require('net');
 app.get('/bot', function(req,res){
     client = new net.Socket();
@@ -1201,6 +1202,7 @@ app.get('/bot', function(req,res){
         client.write('NICK '+setting.NICK+'\r\n');
         client.write('JOIN '+setting.CHANNEL+'\r\n');    
         client.write('PRIVMSG '+setting.CHANNEL+' :' + '大家安安 \r\n')
+        connected = true;
     });
 
     client.on('data', function(data) {
@@ -1218,9 +1220,12 @@ app.get('/bot', function(req,res){
 })
 
 app.get('/part', function(req,res){
-    client.write('PRIVMSG '+setting.CHANNEL+' :' + '大家88 \r\n')
-    client.write('PART '+setting.CHANNEL+'\r\n');
-    client.destroy();
+    if (connected){
+        client.write('PRIVMSG '+setting.CHANNEL+' :' + '大家88 \r\n')
+        client.write('PART '+setting.CHANNEL+'\r\n');
+        client.destroy();
+        connected = false;
+    }
     res.send('ok');
 })
 
@@ -1245,8 +1250,8 @@ app.get('/duel', function(req, res){
             res.send(receiver+" 要先解除保護才能被攻擊 !保護 解除");
             return;
         }
-        if(sender == 'acs142' || receiver == 'acs142'){
-            res.send(sender+" mod不能被攻擊 BibleThump");
+        if(!connected){
+            res.send(sender+" ss87bot不在這 請稍等 BibleThump");
             return;
         }
         var str = sender;
