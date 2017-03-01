@@ -1270,3 +1270,58 @@ app.get('/duel', function(req, res){
     }
 
 })
+
+app.get('/duel_money', function(req, res){ 
+    var sender = req.query.sender.toLowerCase(), receiver = req.query.receiver.toLowerCase();
+    var num = 10;
+    //split and check input
+    if (sender == "null"){
+        res.send("輸入對手名字來決鬥 骰到攻擊力大於50你獲勝 輸的人給10個麵包 雙方都要解除保護 例: !決鬥吧 acs142");
+        return;
+    }
+    else if (receiver == "null" || receiver == sender){
+        res.send("輸入對手名字來決鬥 骰到攻擊力大於50你獲勝 輸的人給10個麵包 雙方都要解除保護 例: !決鬥 acs142");
+        return;
+    }
+    else{
+        if(whitelist.indexOf(sender) == -1){
+            res.send(sender+" 要先解除保護才能攻擊 !保護 解除");
+            return;
+        }
+        if(whitelist.indexOf(receiver) == -1){
+            res.send(receiver+" 要先解除保護才能被攻擊 !保護 解除");
+            return;
+        }
+
+        var str = sender, give, take;
+        var roll = getRandomInt(1,101);
+        str += " 攻擊力為 " + roll + "，";
+        if(roll <= 50){
+            give = sender;
+            take = receiver;
+        }
+        else{
+            give = receiver;
+            take = sender;
+        }
+        revlo.get.points(take).then(data=> {
+            revlo.get.points(give).then(data => {
+                var mypoint = data.loyalty.current_points;
+                if(mypoint < num)
+                    res.send(give + "結果你沒錢還來決鬥 87 BrokeBack");
+                else{
+                    revlo.post.bonus(give, {
+                        amount: -1*num,
+                    }).then(data => {
+                        revlo.post.bonus(take, {
+                            amount: num,
+                        }).then(data => {
+                            res.send(give +" 輸"+ num +"麵包給 " + take + " VoHiYo");
+                        }, console.error);
+                    }, console.error);
+                }
+            }, console.error);
+        }, function(err){ res.send("你找錯了 這裡沒有 " + take + " 這個人啦 ಠ_ಠ")} );
+    }
+
+})
