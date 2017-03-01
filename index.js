@@ -1295,7 +1295,7 @@ app.get('/duel_money', function(req, res){
 
         var str = sender, give, take;
         var roll = getRandomInt(1,101);
-        str += " 攻擊力為 " + roll + "，";
+        str += " 攻擊力為 " + roll + "， ";
         if(roll <= 50){
             give = sender;
             take = receiver;
@@ -1316,7 +1316,7 @@ app.get('/duel_money', function(req, res){
                         revlo.post.bonus(take, {
                             amount: num,
                         }).then(data => {
-                            res.send(give +" 輸"+ num +"麵包給 " + take + " VoHiYo");
+                            res.send(str + give +" 輸"+ num +"麵包給 " + take + " VoHiYo");
                         }, console.error);
                     }, console.error);
                 }
