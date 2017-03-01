@@ -1162,7 +1162,7 @@ app.get('/open', function(req, res){
 
 var whitelist = [];
 app.get('/protect', function(req, res){ 
-    var sender = req.query.sender, arg = req.query.arg;
+    var sender = req.query.sender.toLowerCase(), arg = req.query.arg;
     if(arg == "解除"){
         if(whitelist.indexOf(sender) == -1){
             whitelist.push(sender);
@@ -1226,7 +1226,7 @@ app.get('/part', function(req,res){
 
 
 app.get('/duel', function(req, res){ 
-    var sender = req.query.sender, receiver = req.query.receiver.toLowerCase();
+    var sender = req.query.sender.toLowerCase(), receiver = req.query.receiver.toLowerCase();
     //split and check input
     if (sender == "null"){
         res.send("輸入對手名字來決鬥 骰到攻擊力大於50你獲勝 輸的人被ban 60秒 雙方都要解除保護 例: !決鬥吧 acs142");
