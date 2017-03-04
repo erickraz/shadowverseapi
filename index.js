@@ -4,6 +4,7 @@ var mongodb = require("mongodb");
 var ObjectID = mongodb.ObjectID;
 
 const revlo = require('node-revlobot-api')('9egaKeMFszamdYhlmxAhM3UPaT1QBmnNivJLzwhxcu8');
+const revlo2 = require('node-revlobot-api')('sngq9Pn6hnz0ulihMxxxm0uJ-EXTg_VMbxuy3w9kzbY');
 
 
 app.set('port', (process.env.PORT || 5000));
@@ -906,6 +907,7 @@ app.get('/gamble', function (req, res) {
     var user = req.query.user.toLowerCase();
     var num = Number(req.query.bet);
     var ante = Number(req.query.ante);
+    var endpoint = revlo;
     if(isNaN(num)){
         res.send(user+" :要賭不要輸錯數字啦 (╬ಠ益ಠ)"); 
         return;
@@ -918,7 +920,7 @@ app.get('/gamble', function (req, res) {
         res.send(user+" :底注是"+ante+"個麵包喔 VoHiYo");
         return;
     }
-    revlo.get.points(user).then(data => {
+    endpoint.get.points(user).then(data => {
         var mypoint = data.loyalty.current_points;
         if(mypoint < num)
             res.send(user + " :沒錢先挖礦 再來賭博好爆 Kappa");
@@ -947,7 +949,60 @@ app.get('/gamble', function (req, res) {
             var total = mypoint + bonus;
             str += " 現在有"+ total +"個麵包";
             //send
-            revlo.post.bonus(user, {
+            endpoint.post.bonus(user, {
+                amount: bonus,
+            }).then(data => {
+                res.send(str);
+            }, console.error);
+        }
+    }, console.error);    
+
+})
+
+
+app.get('/gamble_decade', function (req, res) {
+    var user = req.query.user.toLowerCase();
+    var num = Number(req.query.bet);
+    var ante = Number(req.query.ante);
+    var endpoint = revlo2;
+    if(isNaN(num)){
+        res.send(user+" :要賭不要輸錯數字啦 (╬ಠ益ಠ)"); 
+        return;
+    }
+    if(num < 0){
+        res.send(user+" :賭負的gumi喵 你4不4有什麼企圖 ಠ_ಠ"); 
+        return;
+    }
+    else if(num < ante){
+        res.send(user+" :底注是"+ante+"個gumi喵喔 VoHiYo");
+        return;
+    }
+    endpoint.get.points(user).then(data => {
+        var mypoint = data.loyalty.current_points;
+        if(mypoint < num)
+            res.send(user + " :大大沒喵了啦 存錢再來賭博好不 Kappa");
+        else{
+            //roll
+            var str = user, bonus;
+            var roll = getRandomInt(1,101);
+            str += " 骰出 " + roll + "，";
+
+            if(roll <= 60){
+                str += num + "個gumi喵跑掉了 (;´༎ຶД༎ຶ`)";
+                bonus = -1*num;
+            }
+            else if(roll <= 98){
+                str += "撿到"+num*2+"個gumi喵 (ﾉ>ω<)ﾉ";
+                bonus = num;
+            }
+            else{
+                str += "撿到"+num*3+"個gumi喵。天選之人4你 ╮(′～‵〞)╭";
+                bonus = num*2;
+            }
+            var total = mypoint + bonus;
+            str += " 現在有"+ total +"個gumi喵";
+            //send
+            endpoint.post.bonus(user, {
                 amount: bonus,
             }).then(data => {
                 res.send(str);
