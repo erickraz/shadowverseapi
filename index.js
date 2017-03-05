@@ -451,13 +451,17 @@ app.get('/update', function (req, res) {
 
 app.get('/api', function (req, res) {
     var arg = req.query.arg, num, name_ch, class_="", type="", example;
-    var cht = req.query.cht;
+    var cht = req.query.cht, pack = req.query.pack;
     if(cht)
         example = "指令錯誤喔 範例: !卡片 566, !卡片 貞德 , !卡片 法 5, !卡片 皇 756, !卡片 龍 護符 5";
     else
         example = "Invalid input argument. Ex: !card 566, !card forte , !card rune 5, !card sword 756, !card dra amulet 5";
     //parsing...
-    if(arg == "null" || arg == ""){
+    var query = {};
+    if(pack){
+        query['detail.pack'] = pack;
+    }
+    else if(arg == "null" || arg == ""){
         if(cht)
             res.send("範例: !卡片 566, !卡片 貞德 , !卡片 法 5, !卡片 皇 756, !卡片 皇 護符 5");
         else
@@ -465,7 +469,6 @@ app.get('/api', function (req, res) {
         return;
     }
     var argv = arg.split(" ");
-    var query = {};
     var err_msg;
     if(argv.length == 1){
         num = Number(argv[0]);
@@ -477,6 +480,12 @@ app.get('/api', function (req, res) {
             else{
                 query['name'] = new RegExp(argv[0], "i");
                 err_msg = "No cards found for name: "+argv[0];
+            }
+            if(argv[0] == "null"){
+                if(cht)
+                    delete query['name_ch'];
+                else
+                    delete query['name'];
             }
         }
         else{
@@ -610,7 +619,6 @@ app.get('/api', function (req, res) {
         else
             err_msg = "No cards found for "+class_+" "+msg_num+" "+type;
     }
-
     db.collection(CARDS_COLLECTION).find(query).toArray(
         function(err, doc){
             if(cht)
