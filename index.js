@@ -233,7 +233,9 @@ app.get('/deck', function(req1, res1){
         if ('data' in obj && 'hash' in obj.data){
             params['hash'] = obj.data.hash;
             //arrange cookie
-            var cookie = JSON.parse(req1.cookies.decks);
+            var cookie;
+            if(req1.cookies.decks)
+                cookie = JSON.parse(req1.cookies.decks);
             var currentHash = obj.data.hash;
             var item = { 
                 hash: currentHash,
@@ -246,12 +248,12 @@ app.get('/deck', function(req1, res1){
                     if(array[i].hash == currentHash)
                         index = i;
                 }
-                if(index == -1){
-                    array.unshift(item);//
+                if(index != -1){
+                    res1.redirect('deck?history='+index+'&lang='+lang);
+                    return
                 }
-                else if(array.length == maxLen){
-                    array.splice(maxLen-1,1);
-                    array.unshift(item);
+                else if(index == -1){
+                    array.unshift(item);//
                 }
                 cookie = array;
                 res1.cookie('decks', JSON.stringify(cookie), { maxAge: 86400000*30});

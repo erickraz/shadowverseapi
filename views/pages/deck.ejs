@@ -70,14 +70,30 @@ a.splink{
   border-radius: 4px;
 }
 .box3 {
+  position: relative;
   overflow: auto;
   display: block;
   margin: 0px auto;
   border-radius: 4px;
 }
 
+.box3-container{
+  position: relative;  
+  float:left;
+  width: 15px;
+  height: 84px;
+}
+
 .selected {
-  border-color: lightblue;
+  float:left;
+  position: absolute;
+  top: 36px;
+  width: 10px;
+  height: 10px;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+  background: #326fd1;
 }
 
 .display{
@@ -295,11 +311,17 @@ $(document).ready(function() {
 
 
 function handleCookie(){
-  var maxLen = 3, decks;
+  var history_idx = -1, decks;
   console.log(Cookies.get("decks"));
   if(Cookies.get("decks")){
     var decks = JSON.parse(Cookies.get("decks"));
   }
+  <% if(locals.history){ %>
+    history_idx = <%=history%>;
+  <% } else if(locals.hash){%>
+    history_idx = 0;
+  <% }%>
+  console.log(history_idx);
 // <% if(locals.hash){ %>
 //   var currentHash = "<%=hash%>";
 //   var item = { 
@@ -336,6 +358,14 @@ function handleCookie(){
     for(var i = 0; i < decks.length; ++i){
       var hash = decks[i].hash;
       var divHistory = document.getElementById('history');
+
+      var selected_container = document.createElement('div');
+      selected_container.setAttribute('class', 'box3-container');
+      if(history_idx == i){
+        var selected = document.createElement('div');
+        selected.setAttribute('class', 'selected');
+        selected_container.appendChild(selected);
+      }
 
       var img = document.createElement('input');
       img.setAttribute('src',"/images/classes/class"+hash[2]+".png");
@@ -374,11 +404,14 @@ function handleCookie(){
       var div = document.createElement('div');
       div.setAttribute('id', 'history_div'+i);
       div.setAttribute('class', 'box3');
+      div.appendChild(selected_container);
       div.appendChild(img);
       div.appendChild(time);
       div.appendChild(input);
       div.appendChild(input_button);
       div.appendChild(delete_desc);
+
+
       divHistory.appendChild(div);
     }
   }
