@@ -16,7 +16,8 @@
     "mongodb": "^2.0.43",
     "node-revlobot-api": "0.0.2",
     "time": "0.11.4",
-    "cookie-parser": "1.4.3"
+    "cookie-parser": "1.4.3",
+    "socket.io": "1.4.6"
   },
   "repository": {
     "type": "git",

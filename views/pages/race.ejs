@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<style>
+body{
+  background-color: transparent;
+  color: white;
+  font-size: 16px;
+}
+
+
+.box1 {
+  display:none;
+  position: absolute;
+  text-align:center;
+  width: 300px;
+  height: 100px;
+  margin: 0px auto;
+}
+.racer1{
+  position: absolute;
+  top:10px;
+  height: 40px;
+}
+.racer2{
+  position: absolute;
+  top:60px;
+  height: 40px;
+}
+.box2 {
+  /* background-color : #EEE; */
+  background-color : #232323;
+  display: block;
+  width: 800px;
+  height: auto;
+  margin: 0px auto;
+  border-radius: 4px;
+}
+.box3 {
+  position: relative;
+  overflow: auto;
+  display: block;
+  margin: 0px auto;
+  border-radius: 4px;
+}
+
+.box3-container{
+  position: relative;  
+  float:left;
+  width: 15px;
+  height: 84px;
+}
+
+.selected {
+  float:left;
+  position: absolute;
+  top: 36px;
+  width: 10px;
+  height: 10px;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+  background: #326fd1;
+}
+
+.display{
+  margin: 20px auto;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+.switch input {display:none;}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: #2196F3;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 2px;
+}
+
+.slider.round:before {
+  border-radius: 2px;
+}
+
+.arrow_box {
+  display:none;
+  width: auto;
+  position: relative;
+  background: #a4becf;
+  color: white;
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  font-size: 16px;
+  margin: 4px 2px;
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  border-radius: 4px;
+}
+.arrow_box:after, .arrow_box:before {
+  right: 100%;
+  top: 50%;
+  border: solid transparent;
+  content: " ";
+  height: 0;
+  width: 0;
+  position: absolute;
+  pointer-events: none;
+}
+
+.arrow_box:after {
+  border-color: rgba(164, 190, 207, 0);
+  border-right-color: #a4becf;
+  border-width: 8px;
+  margin-top: -8px;
+} 
+
+.outer{
+  height: 60;
+  width: auto;
+  position: relative;
+}
+.loader {
+  position: absolute;
+  top: calc(50% - 24px);
+  display: none;
+  border: 5px solid #f3f3f3; /* Light grey */
+  border-top: 5px solid #3498db; /* Blue */
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.left {
+  float: left;
+}
+.right{
+  margin: 0px 25px;
+  float: left;
+}
+.delete{
+  float: right;
+  color: #cc0000;
+}
+</style>
+
+
+<div id = "main" class = "box1">
+<div id = "p1" class="racer1">
+  <img src="images/racer1.png" height="40px">
+</div>
+<div id = "p2" class="racer2">
+  <img src="images/racer2.png" height="40px">
+</div>
+<span class = "svg">
+  <svg height="100" width="200">
+    <g fill="none" stroke="black">
+      <path stroke-width="6" d="M5 25 l200 0" />
+      <path stroke-width="6" d="M5 75 l200 0" />
+    </g>
+  </svg>
+</span>
+<span>
+  <img src="images/race.png" height="100px">
+</span>
+</div>
+
+
+
+
+
+<script src="/js/jquery-3.1.1.min.js" type="text/javascript"></script>
+<script src="https://cdn.socket.io/socket.io-1.4.5.js" type="text/javascript"></script>
+<script>
+  var loc = window.location.origin.substring(0,17);
+  var socket = io.connect(loc+'8081');
+  var num = 0;
+  socket.on('start', function (data) {
+    $("#main").fadeIn("slow");  
+    document.getElementById("p1").style.left = '0px';
+    document.getElementById("p2").style.left = '0px';
+    num = data;
+  });
+  socket.on('p1', function (data) {
+    document.getElementById("p1").style.left = data*200/num+'px';
+  });
+  socket.on('p2', function (data) {
+    document.getElementById("p2").style.left = data*200/num+'px';
+  });
+  socket.on('end', function (data) {
+    $("#main").fadeOut("slow");
+  });
+</script>
+
+</body>
+</html>
