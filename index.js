@@ -1338,6 +1338,7 @@ app.get('/bot', function(req,res){
                                 }).then(data => {
                                 }, console.error);
                             }
+                            list1 = [];
                         }
                     }
                     
@@ -1358,6 +1359,7 @@ app.get('/bot', function(req,res){
                                 }).then(data => {
                                 }, console.error);
                             }
+                            list2 = [];
                         }
                     }
                 }
