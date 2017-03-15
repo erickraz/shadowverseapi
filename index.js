@@ -1309,6 +1309,12 @@ app.get('/bot', function(req,res){
                     p1 = 0;
                     p2 = 0;
                 }
+                if(msg.search('!取消')==0&& mods.indexOf(user)!=-1 && start ==1){
+                    var pm = "賽跑取消";
+                    client.write('PRIVMSG '+setting.CHANNEL+' :' + pm+'\r\n');
+                    io.emit('end', 'end');
+                    start = 0;
+                }
                 if(msg=='!進度' && start==1){
                     var pm = '目前進度: 露娜'+p1+'/'+num+', 班比'+p2+'/'+num;
                     client.write('PRIVMSG '+setting.CHANNEL+' :' + pm+' \r\n');
