@@ -1,11 +1,9 @@
 var express = require('express'), http = require('http');
 var app = express();
-var server = require("http").Server(app);
-var io = require("socket.io")(server);
-io.on('connection', function (socket) {
-  //socket.emit('start', 'start');
-});
-server.listen(8081);
+var server = require("http").createServer(app);
+
+var io = require("socket.io").listen(server);
+server.listen(process.env.PORT || 5000);
 
 var mongodb = require("mongodb");
 var ObjectID = mongodb.ObjectID;
@@ -405,10 +403,12 @@ mongodb.MongoClient.connect(uristring, function (err, database) {
   db = database;
 
   // Initialize the app.
-  var server = app.listen(app.get('port'), function () {
-    var port = server.address().port;
-  });
+  //server = app.listen(app.get('port'), function () {
+  //  var port = server.address().port;
+  //});
 });
+
+
 
 app.get('/init', function (req, res) {
     fs.readFile('cards.json', 'utf8', function (err, data) {
