@@ -1,5 +1,12 @@
-var express = require('express');
+var express = require('express'), http = require('http');
 var app = express();
+var server = require("http").Server(app);
+var io = require("socket.io")(server);
+io.on('connection', function (socket) {
+  //socket.emit('start', 'start');
+});
+server.listen(8081);
+
 var mongodb = require("mongodb");
 var ObjectID = mongodb.ObjectID;
 
@@ -69,7 +76,8 @@ var packmap ={
 }
 
 app.get('/', function(req, res) {
-  res.render('pages/index');
+    io.emit('test', 'hmm');
+    res.render('pages/index');
 });
 
 
@@ -305,6 +313,10 @@ app.get('/deck', function(req1, res1){
         }
     }
 });
+
+app.get('/race', function(req, res){
+    res.render('pages/race',{});
+})
 
 app.get('/test2', function(req, res){
     console.log(req.query.char_type);
@@ -1249,6 +1261,9 @@ app.get('/protect', function(req, res){
 })
 
 
+var mods = ['erickraz', 'acs142', 'shanasaikou'];
+var p1, p2, start=0, num;
+var list1 = [], list2 = [];
 var setting = {
     HOST: "irc.chat.twitch.tv",
     PORT: 6667,
@@ -1266,14 +1281,81 @@ app.get('/bot', function(req,res){
         client.write('PASS '+setting.PASS+'\r\n');
         client.write('NICK '+setting.NICK+'\r\n');
         client.write('JOIN '+setting.CHANNEL+'\r\n');    
-        client.write('PRIVMSG '+setting.CHANNEL+' :' + '大家安安 \r\n')
+        client.write('PRIVMSG '+setting.CHANNEL+' :' + '大家安安 \r\n');
         connected = true;
     });
 
     client.on('data', function(data) {
         console.log('Received: ' + data);
-        if(data == 'PING :tmi.twitch.tv'){
-            client.write('PONG :tmi.twitch.tv'+'\r\n');
+        data = data.toString();
+        lines = data.split('\n');
+        for(var i = 0; i < lines.length; ++i){
+            if(lines[i].search('PING')!=-1){
+                client.write('PONG :tmi.twitch.tv'+'\r\n');
+                console.log('Ponged');
+            }
+            else if(lines[i].search('PRIVMSG')!=-1){
+                var sep = lines[i].split(':');
+                var user = sep[1].substring(0,lines[i].indexOf('!')-1);
+                var msg = sep[2].substring(0,sep[2].length-1);
+                //client.write('PRIVMSG '+setting.CHANNEL+' :' + user+' said: '+msg+' \r\n');
+                console.log(start);
+                if(msg.search('!賽跑')==0 && msg.length>4 && mods.indexOf(user)!=-1 && start ==0){
+                    num = Number(msg.substring(3));
+                    var pm = "sv賽跑開始 打 露娜 或是 班比 來投票 最先拿到"+num+"票到達終點並獲勝 並且投給勝者的觀眾將獲得100個麵包";
+                    client.write('PRIVMSG '+setting.CHANNEL+' :' + pm+'\r\n');
+                    io.emit('start', num);
+                    start = 1;
+                    p1 = 0;
+                    p2 = 0;
+                }
+                if(msg=='!進度' && start==1){
+                    var pm = '目前進度: 露娜'+p1+'/'+num+', 班比'+p2+'/'+num;
+                    client.write('PRIVMSG '+setting.CHANNEL+' :' + pm+' \r\n');
+                }
+                if(msg.search('班比')!=-1 && msg.search('露娜')!=-1 && start==1){
+                    client.write('PRIVMSG '+setting.CHANNEL+' :' + user+': '+msg+' 真花心 \r\n');
+                }
+                else if(msg.search('露娜')!=-1 && start==1){
+                    if(list1.indexOf(user)==-1 && list2.indexOf(user)==-1){
+                        list1.push(user);
+                        p1 = p1+1;
+                        io.emit('p1', p1);
+                        if(p1 == num){
+                            io.emit('end', 'end');
+                            var pm = '露娜'+p1+':班比'+p2+', 露娜獲勝! 投給露娜的觀眾獲得100麵包~ GivePLZ';
+                            client.write('PRIVMSG '+setting.CHANNEL+' :'+pm+' \r\n');
+                            start = 0;
+                            for(var j = 0; j < list1.length; ++j){
+                                revlo.post.bonus(list1[j].toLowerCase(), {
+                                    amount: 100,
+                                }).then(data => {
+                                }, console.error);
+                            }
+                        }
+                    }
+                    
+                }
+                else if(msg.search('班比')!=-1 && start==1){
+                    if(list1.indexOf(user)==-1 && list2.indexOf(user)==-1){
+                        list2.push(user);
+                        p2 = p2+1;
+                        io.emit('p2', p2);
+                        if(p2 == num){
+                            io.emit('end', 'end');
+                            var pm = '露娜'+p1+':班比'+p2+',班比獲勝! 投給班比的觀眾獲得100麵包~ GivePLZ';
+                            client.write('PRIVMSG '+setting.CHANNEL+' :'+pm+' \r\n');
+                            start = 0;
+                            for(var j = 0; j < list2.length; ++j){
+                                revlo.post.bonus(list2[j].toLowerCase(), {
+                                    amount: 100,
+                                }).then(data => {
+                                }, console.error);
+                            }
+                        }
+                    }
+                }
+            }
         }
         //client.destroy(); // kill client after server's response
     });
@@ -1390,3 +1472,7 @@ app.get('/duel_money', function(req, res){
     }
 
 })
+
+app.get('/follow_time', function(req, res){
+
+});

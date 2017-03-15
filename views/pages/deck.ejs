@@ -297,6 +297,8 @@ input:checked + .slider:before {
 <script src="/js/js.cookie.js" type="text/javascript"></script>
 <script>
 $(document).ready(function() {
+    console.log('...');
+
   var myForm = document.forms.req_form;
 <% if(locals.deck_code) {%>
   var myControls = myForm.elements['deck_code'];
