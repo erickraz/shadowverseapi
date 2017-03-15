@@ -300,10 +300,6 @@ $(document).ready(function() {
     console.log('...');
 
   var myForm = document.forms.req_form;
-<% if(locals.deck_code) {%>
-  var myControls = myForm.elements['deck_code'];
-  myControls.value="<%= deck_code%>";
-<% } %>
   var langControl = document.getElementById('<%= lang %>');
   langControl.checked = true;
 
