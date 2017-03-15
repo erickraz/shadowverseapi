@@ -222,9 +222,9 @@ input:checked + .slider:before {
 <script>
   var ori = window.location.origin;
   console.log(ori);
-  ori = ori.substring(0,ori.length-4)
+  //ori = ori.substring(0,ori.length-4)
 
-  var socket = io.connect(ori+'8081');
+  var socket = io.connect(ori+':8081');
   var num = 0;
   socket.on('start', function (data) {
     $("#main").fadeIn("slow");  
