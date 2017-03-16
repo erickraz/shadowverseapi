@@ -238,7 +238,7 @@ input:checked + .slider:before {
 <% var currentHash = hash%>
 
   
-
+  <input type="hidden" id="hash" value="<%= hash%>">
   <div class = "box2">
   <div class = "box1">
     <img id ="img0" src="https://shadowverse-portal.com/image/<%= hash %>?lang=en">
@@ -273,6 +273,16 @@ input:checked + .slider:before {
   </span>
   </div>
 
+  <div class="outer">
+  <a id="deckcode" class = "button-imgur" onclick="getCode();"><b>generate deck code</b></a>
+  <span id ="loader_code" class="loader"></span>
+  <span id ="span_code" class="arrow_box">
+    <input type="text" id="link_code" class="link-imgur" name = "link-code" readonly> 
+    <a id="copycode" class="button-copy" onclick="copyToClipboard(link_code);">複製</a>
+  </span>
+  </div>
+
+
   <div>
   <label class="switch">
   <input id= "lang_checkbox" type="checkbox" onclick='switchImgLang(this);'>
@@ -297,7 +307,6 @@ input:checked + .slider:before {
 <script src="/js/js.cookie.js" type="text/javascript"></script>
 <script>
 $(document).ready(function() {
-    console.log('...');
 
   var myForm = document.forms.req_form;
   var langControl = document.getElementById('<%= lang %>');
@@ -507,6 +516,30 @@ function shorten(){
         $("#span_goo").fadeIn("slow");
     });
   }
+}
+
+function getCode(){
+  $("#span_code").fadeOut("slow");
+  var hash = document.getElementById('hash').value;
+  document.getElementById("loader_code").style.display='inline-block';
+  $.post('/get_code', { hash: hash}, 
+    function(returnedData){
+      //console.log(returnedData);
+      if(returnedData.data && returnedData.data.deck_code){
+        document.getElementById("link_code").value = returnedData.data.deck_code;
+        document.getElementById("loader_code").style.display='none';
+        $("#span_code").fadeIn("slow");
+      }
+      else{
+        document.getElementById("link_code").value  = "發生未知的錯誤";
+        document.getElementById("loader_code").style.display='none';
+        $("#span_code").fadeIn("slow");
+      }
+  }).fail(function(){
+      document.getElementById("link_code").value  = "發生未知的錯誤";
+      document.getElementById("loader_code").style.display='none';
+      $("#span_code").fadeIn("slow");
+  });
 }
 
 function copyToClipboard(elem) {

@@ -170,6 +170,25 @@ app.post('/imgur', function(req, res){
     
 });
 
+app.post('/get_code', function(req, res){
+    var hash = req.body.hash;
+    console.log(req.body);
+    var option = {
+        url: 'https://shadowverse-portal.com/api/v1/deck_code/publish/?format=json&lang=en',
+        method: "POST",
+        form: {
+            hash: hash,
+            csrf_token: "105b061206e2e9b10394847587b45765da385523d7f15e1625ad280e62866fdb"
+        }
+    };
+    request(option, cb);
+    function cb(error, response, body) {
+        var info = JSON.parse(body);
+        res.send(info);
+    }
+    
+});
+
 var maxLen = 5;
 app.get('/deck', function(req1, res1){
     var lang, deck_code = req1.query.deck_code;
@@ -1070,12 +1089,6 @@ app.get('/assemble', function(req, res){
     var a = h1-h2;
     if(a < 0) a *= -1;
     a = 100 - a;
-    //rigged
-    if(a == 77)
-        a = 87;
-    else if(a == 87)
-        a = 77;
-
 
     //post process
     var str = "";
